@@ -6,12 +6,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Représentation simplifiée d'un tarif.
  * Le calcul réel pourra prendre en compte de multiples facteurs ;
  * ce modèle stocke des paramètres de base.
  */
+@Getter
+@Setter
 @Entity
 public class Tarif {
 
@@ -40,56 +44,28 @@ public class Tarif {
     public Tarif() {
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getZone() {
-        return zone;
     }
 
     public void setZone(String zone) {
         this.zone = zone;
     }
 
-    public BigDecimal getMontantParHeure() {
-        return montantParHeure;
-    }
-
     public void setMontantParHeure(BigDecimal montantParHeure) {
         this.montantParHeure = montantParHeure;
-    }
-
-    public BigDecimal getTarifMinimum() {
-        return tarifMinimum;
     }
 
     public void setTarifMinimum(BigDecimal tarifMinimum) {
         this.tarifMinimum = tarifMinimum;
     }
 
-    public BigDecimal getForfaitJournalier() {
-        return forfaitJournalier;
-    }
-
     public void setForfaitJournalier(BigDecimal forfaitJournalier) {
         this.forfaitJournalier = forfaitJournalier;
     }
 
-    public BigDecimal getReductionAbonne() {
-        return reductionAbonne;
-    }
-
     public void setReductionAbonne(BigDecimal reductionAbonne) {
         this.reductionAbonne = reductionAbonne;
-    }
-
-    public BigDecimal getMajorationApres() {
-        return majorationApres;
     }
 
     public void setMajorationApres(BigDecimal majorationApres) {

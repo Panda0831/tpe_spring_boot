@@ -11,7 +11,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 public class Place {
 
@@ -40,56 +44,28 @@ public class Place {
     public Place() {
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getNumero() {
-        return numero;
     }
 
     public void setNumero(String numero) {
         this.numero = numero;
     }
 
-    public String getZone() {
-        return zone;
-    }
-
     public void setZone(String zone) {
         this.zone = zone;
-    }
-
-    public PlaceType getType() {
-        return type;
     }
 
     public void setType(PlaceType type) {
         this.type = type;
     }
 
-    public PlaceStatut getStatut() {
-        return statut;
-    }
-
     public void setStatut(PlaceStatut statut) {
         this.statut = statut;
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
     public void setReservations(List<Reservation> reservations) {
         this.reservations = reservations;
-    }
-
-    public List<EntreeSortie> getEntreesSorties() {
-        return entreesSorties;
     }
 
     public void setEntreesSorties(List<EntreeSortie> entreesSorties) {

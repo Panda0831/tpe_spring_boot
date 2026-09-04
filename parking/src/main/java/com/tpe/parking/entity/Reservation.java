@@ -10,7 +10,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 public class Reservation {
 
@@ -35,62 +39,6 @@ public class Reservation {
     private ReservationStatus statut;
 
     public Reservation() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Utilisateur getUtilisateur() {
-        return utilisateur;
-    }
-
-    public void setUtilisateur(Utilisateur utilisateur) {
-        this.utilisateur = utilisateur;
-    }
-
-    public Vehicule getVehicule() {
-        return vehicule;
-    }
-
-    public void setVehicule(Vehicule vehicule) {
-        this.vehicule = vehicule;
-    }
-
-    public Place getPlace() {
-        return place;
-    }
-
-    public void setPlace(Place place) {
-        this.place = place;
-    }
-
-    public LocalDateTime getDateArriveePrevue() {
-        return dateArriveePrevue;
-    }
-
-    public void setDateArriveePrevue(LocalDateTime dateArriveePrevue) {
-        this.dateArriveePrevue = dateArriveePrevue;
-    }
-
-    public LocalDateTime getDateDepartPrevue() {
-        return dateDepartPrevue;
-    }
-
-    public void setDateDepartPrevue(LocalDateTime dateDepartPrevue) {
-        this.dateDepartPrevue = dateDepartPrevue;
-    }
-
-    public ReservationStatus getStatut() {
-        return statut;
-    }
-
-    public void setStatut(ReservationStatus statut) {
-        this.statut = statut;
     }
 
     @Override
