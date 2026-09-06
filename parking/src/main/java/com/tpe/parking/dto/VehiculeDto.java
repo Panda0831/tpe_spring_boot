@@ -21,6 +21,8 @@ public record VehiculeDto(
         @NotNull(message = "L'utilisateur est obligatoire")
         UtilisateurDto utilisateur
 ) {
+
+
     public static VehiculeDto versDto(Vehicule vehicule) {
         if (vehicule == null) return null;
 

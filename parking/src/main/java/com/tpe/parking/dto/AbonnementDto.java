@@ -3,6 +3,9 @@ package com.tpe.parking.dto;
 import com.tpe.parking.entity.Utilisateur;
 import com.tpe.parking.entity.Vehicule;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
 
 public record AbonnementDto(
         Long id,
@@ -10,7 +13,7 @@ public record AbonnementDto(
         String type,
         @NotNull(message = "Le véhicule est obligatoire")
         Vehicule vehicule,
-        String status,
+        String statut,
         Utilisateur utilisateur,
         @NotNull(message = "La date de début est obligatoire")
         String dateDebut,
@@ -30,5 +33,45 @@ public record AbonnementDto(
                 abonnement.getDateFin() != null ? abonnement.getDateFin().toString() : null
         );
     }
- 
+
+    @Override
+    public Long id() {
+        return id;
+    }
+    public @NotNull(message = "Le type d'abonnement est obligatoire") String type() {
+        return type;
+    }
+
+    @Override
+    public @NotNull(message = "Le véhicule est obligatoire") Vehicule vehicule() {
+        return vehicule;
+    }
+
+    public Vehicule getVehicule() {
+        return vehicule;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Object getStatut() {
+        return statut;
+    }
+
+    public Utilisateur getUtilisateur() {
+        return utilisateur;
+    }
+
+    public CharSequence getDateDebut() {
+        return dateDebut;
+    }
+
+    public CharSequence getDateFin() {
+        return dateFin;
+    }
 }
