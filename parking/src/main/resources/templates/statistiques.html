@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Statistiques')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="h3 mb-3">Statistiques d'occupation et de revenus</h1>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Places</div>
+                <div class="kpi-valeur" th:text="${nbPlaces}">0</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Taux d'occupation</div>
+                <div class="kpi-valeur text-primary"
+                     th:text="${#numbers.formatDecimal(occupation.tauxOccupationPourcentage, 1, 2)} + ' %'">0 %</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">CA du jour</div>
+                <div class="kpi-valeur text-success"
+                     th:text="${#numbers.formatDecimal(revenuJour.chiffreAffairesTotal, 1, 2)} + ' Ar'">0 Ar</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">CA période</div>
+                <div class="kpi-valeur text-success"
+                     th:text="${#numbers.formatDecimal(totalPeriode, 1, 2)} + ' Ar'">0 Ar</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Véhicules présents</div>
+                <div class="kpi-valeur text-danger" th:text="${nbPresents}">0</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Passages</div>
+                <div class="kpi-valeur" th:text="${nbEntreesSorties}">0</div>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <!-- Occupation par zone -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Taux d'occupation par zone</div>
+                <div class="card-body">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Zone</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Libres</th>
+                            <th class="text-end">Occupées</th>
+                            <th class="text-end">Réservées</th>
+                            <th style="width: 25%">Taux</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="z : ${zones}">
+                            <td class="fw-semibold" th:text="${z.zone}">Zone</td>
+                            <td class="text-end" th:text="${z.totalPlaces}">0</td>
+                            <td class="text-end text-success" th:text="${z.placesLibres}">0</td>
+                            <td class="text-end text-danger" th:text="${z.placesOccupees}">0</td>
+                            <td class="text-end text-primary" th:text="${z.placesReservees}">0</td>
+                            <td>
+                                <div class="jauge">
+                                    <div th:style="'width: ' + ${z.tauxOccupationPourcentage} + '%'"></div>
+                                </div>
+                                <small th:text="${#numbers.formatDecimal(z.tauxOccupationPourcentage, 1, 2)} + ' %'">0 %</small>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(zones)}">
+                            <td colspan="6" class="text-muted">Aucune place configurée.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volumes -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Volumes gérés</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Utilisateurs</span><strong th:text="${nbUtilisateurs}">0</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Véhicules enregistrés</span><strong th:text="${nbVehicules}">0</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Abonnements</span><strong th:text="${nbAbonnements}">0</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Passages à la borne</span><strong th:text="${nbEntreesSorties}">0</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Sorties facturées aujourd'hui</span>
+                            <strong th:text="${revenuJour.nombreSortiesFacturees}">0</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Ticket moyen du jour</span>
+                            <strong th:text="${#numbers.formatDecimal(revenuJour.montantMoyenParStationnement, 1, 2)} + ' Ar'">0 Ar</strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Histogramme du chiffre d'affaires -->
+    <div class="card mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Chiffre d'affaires des derniers jours</span>
+            <form class="d-flex gap-2 align-items-center" method="get" th:action="@{/statistiques}">
+                <label class="small text-muted mb-0" for="jours">Période (jours)</label>
+                <input class="form-control form-control-sm" style="width: 5rem" type="number" min="1" max="60"
+                       id="jours" name="jours" th:value="${periode}">
+                <button class="btn btn-sm btn-primary" type="submit">Actualiser</button>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="d-flex align-items-end gap-2" style="height: 200px;">
+                <div th:each="r : ${revenus}" class="text-center flex-fill d-flex flex-column justify-content-end h-100">
+                    <div class="small text-muted"
+                         th:text="${#numbers.formatDecimal(r.montant, 1, 2)} + ' Ar'">0 Ar</div>
+                    <div class="barre-revenu" th:style="'height: ' + ${r.pourcentage} + '%'"></div>
+                    <div class="small mt-1"
+                         th:text="${#temporals.format(r.date, 'dd/MM')}">01/01</div>
+                </div>
+            </div>
+            <table class="table table-sm mt-4 mb-0">
+                <thead>
+                <tr>
+                    <th>Jour</th>
+                    <th class="text-end">Sorties facturées</th>
+                    <th class="text-end">Chiffre d'affaires</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${revenus}">
+                    <td th:text="${#temporals.format(r.date, 'dd/MM/yyyy')}">—</td>
+                    <td class="text-end" th:text="${r.nombreSorties}">0</td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(r.montant, 1, 2)} + ' Ar'">0 Ar</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

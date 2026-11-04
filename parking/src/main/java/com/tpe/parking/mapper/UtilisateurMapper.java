@@ -1,60 +1,33 @@
 package com.tpe.parking.mapper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import com.tpe.parking.dto.UtilisateurDto;
+import com.tpe.parking.dto.request.CreateUtilisateurRequest;
+import com.tpe.parking.dto.response.UtilisateurResponse;
+import com.tpe.parking.entity.Role;
 import com.tpe.parking.entity.Utilisateur;
-import com.tpe.parking.entity.Vehicule;
 
-public class UtilisateurMapper {
+public final class UtilisateurMapper {
+
     private UtilisateurMapper() {
     }
 
-    public static UtilisateurDto toDto(Utilisateur utilisateur) {
+    public static UtilisateurResponse toResponse(Utilisateur utilisateur) {
         if (utilisateur == null) {
             return null;
         }
-
-        return new UtilisateurDto(
-                utilisateur.getId(),
-                utilisateur.getNom(),
-                utilisateur.getPrenom(),
-                utilisateur.getTelephone(),
-                utilisateur.getVehicules() == null ? List.of()
-                        : utilisateur.getVehicules().stream()
-                                .filter(Objects::nonNull)
-                                .map(v -> String.valueOf(v.getImmatriculation()))
-                                .toList()
-        );
+        return UtilisateurResponse.fromEntity(utilisateur);
     }
 
-    public static Utilisateur toEntity(UtilisateurDto dto) {
-        if (dto == null) {
+    public static Utilisateur toEntity(CreateUtilisateurRequest request) {
+        if (request == null) {
             return null;
         }
-
         Utilisateur utilisateur = new Utilisateur();
-        utilisateur.setId(dto.getId());
-        utilisateur.setNom(dto.getNom());
-        utilisateur.setPrenom(dto.getPrenom());
-        utilisateur.setTelephone(dto.getTelephone());
-
-        if (dto.getVehicules() != null) {
-            List<Vehicule> vehicules = new ArrayList<>();
-            for (String immatriculation : dto.getVehicules()) {
-                if (immatriculation == null || immatriculation.isBlank()) {
-                    continue;
-                }
-                Vehicule vehicule = new Vehicule();
-                vehicule.setImmatriculation(Long.parseLong(immatriculation.trim()));
-                vehicule.setUtilisateur(utilisateur);
-                vehicules.add(vehicule);
-            }
-            utilisateur.setVehicules(vehicules);
-        }
-
+        utilisateur.setNom(request.nom());
+        utilisateur.setPrenom(request.prenom());
+        utilisateur.setTelephone(request.telephone());
+        utilisateur.setEmail(request.email());
+        utilisateur.setMotDePasse(request.motDePasse());
+        utilisateur.setRole(request.role() != null ? request.role() : Role.USER);
         return utilisateur;
     }
 }

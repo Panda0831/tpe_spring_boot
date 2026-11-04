@@ -1,0 +1,63 @@
+<div class="abonnements-container">
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">Abonnements</h5>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <select class="form-control">
+            <option>Tous les abonnements</option>
+            @for (type of ['ACTIF', 'EXPIRÉ', 'EN_ATTENTE']; track type) { 
+              <option>{{ type }}</option }
+            }
+          </select>
+        </div>
+        <div class="col-md-6">
+          <button class="btn btn-primary float-end">Renouveler sélection</button>
+        </div>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Utilisateur</th>
+              <th>Type</th>
+              <th>Date Début</th>
+              <th>Date Fin</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (abonnement of abonnements; track abonnement) {
+              <tr>
+                <td>{{ abonnement.id }}</td>
+                <td>{{ abonnement.utilisateur?.email || 'N/A' }}</td>
+                <td>{{ abonnement.type }}</td>
+                <td>{{ abonnement.dateDebut | date:'short' }}</td>
+                <td>{{ abonnement.dateFin | date:'short' }}</td>
+                <td>
+                  <span class="badge bg-{{ abonnement.statut === 'ACTIF' ? 'success' : 'secondary' }}">
+                    {{ abonnement.statut }}
+                  </span>
+                </td>
+                <td>
+                  @if (abonnement.statut !== 'ACTIF') {
+                    <button class="btn btn-sm btn-outline-primary">Rétablir</button>
+                  } @else {
+                    <span class="text-muted">Actif</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="text-center">Aucun abonnement trouvé</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Borne entrées/sorties')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="h3 mb-3">Borne entrées / sorties</h1>
+
+    <!-- Ticket du dernier passage enregistré -->
+    <div class="card border-success mb-4" th:if="${ticket != null}">
+        <div class="card-header bg-success text-white">
+            <span th:text="${ticket.enCours} ? 'Ticket d\'entrée' : 'Ticket de sortie'">Ticket</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Véhicule :</strong> <span th:text="${ticket.immatriculationVehicule}">Plaque</span></p>
+                    <p class="mb-1"><strong>Place attribuée :</strong> <span th:text="${ticket.numeroPlace}">A1</span></p>
+                    <p class="mb-1"><strong>Entrée :</strong>
+                        <span th:text="${ticket.dateEntree != null ? #temporals.format(ticket.dateEntree, 'dd/MM/yyyy HH:mm') : '—'}">—</span>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Sortie :</strong>
+                        <span th:text="${ticket.dateSortie != null ? #temporals.format(ticket.dateSortie, 'dd/MM/yyyy HH:mm') : 'en cours de stationnement'}">—</span>
+                    </p>
+                    <p class="mb-1"><strong>Départ prévu :</strong>
+                        <span th:text="${ticket.dateDepartPrevue != null ? #temporals.format(ticket.dateDepartPrevue, 'dd/MM/yyyy HH:mm') : '—'}">—</span>
+                    </p>
+                    <p class="mb-0"><strong>Montant facturé :</strong>
+                        <span class="fs-5 text-success fw-bold"
+                              th:text="${ticket.montant != null ? #numbers.formatDecimal(ticket.montant, 1, 2) + ' Ar' : 'à régler à la sortie'}">—</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <!-- Entrée -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">Enregistrer une entrée</div>
+                <div class="card-body">
+                    <form class="row g-3" method="post" th:action="@{/borne/entree}">
+                        <div class="col-12">
+                            <label class="form-label" for="immatriculationEntree">Immatriculation</label>
+                            <input class="form-control text-uppercase" id="immatriculationEntree"
+                                   name="immatriculation" minlength="2" maxlength="20"
+                                   pattern="[A-Za-z0-9 -]{2,20}"
+                                   title="Utilisez 2 à 20 lettres, chiffres, espaces ou tirets"
+                                   placeholder="CD-AAA-001" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="zoneSouhaitee">Zone souhaitée (optionnelle)</label>
+                            <select class="form-select" id="zoneSouhaitee" name="zoneSouhaitee">
+                                <option value="">Attribution automatique</option>
+                                <option th:each="z : ${zones}" th:value="${z}" th:text="${z}">Zone</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="placeEntree">Place imposée (optionnelle)</label>
+                            <select class="form-select" id="placeEntree" name="placeId">
+                                <option value="">Attribution automatique</option>
+                                <option th:each="p : ${placesLibres}" th:value="${p.id}"
+                                        th:text="${p.zone + ' / ' + p.numero + ' (' + p.type + ')'}">Place</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-success w-100" type="submit">Ouvrir la barrière (entrée)</button>
+                        </div>
+                    </form>
+                    <p class="small text-muted mb-0 mt-3">
+                        Priorité : place réservée par le client → place du type d'abonné → place de la zone
+                        souhaitée → substitution. La place passe de <code>LIBRE</code> à <code>OCCUPEE</code>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sortie -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">Enregistrer une sortie</div>
+                <div class="card-body">
+                    <form class="row g-3" method="post" th:action="@{/borne/sortie}">
+                        <div class="col-12">
+                            <label class="form-label" for="immatriculationSortie">Immatriculation</label>
+                            <input class="form-control text-uppercase" id="immatriculationSortie"
+                                   name="immatriculation" minlength="2" maxlength="20"
+                                   pattern="[A-Za-z0-9 -]{2,20}"
+                                   title="Utilisez 2 à 20 lettres, chiffres, espaces ou tirets" required>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-danger w-100" type="submit">Ouvrir la barrière (sortie)</button>
+                        </div>
+                    </form>
+                    <p class="small text-muted mb-0 mt-3">
+                        La sortie calcule la durée réelle, applique le tarif de la zone (réduction abonné
+                        incluse) et majore les heures de dépassement. La place repasse à <code>LIBRE</code>.
+                    </p>
+                    <div class="mt-3">
+                        <div class="fw-semibold mb-1">Véhicules actuellement présents
+                            (<span th:text="${#lists.size(vehiculesPresents)}">0</span>)</div>
+                        <div class="table-responsive" style="max-height: 12rem; overflow-y: auto;">
+                            <table class="table table-sm mb-0">
+                                <tbody>
+                                <tr th:each="v : ${vehiculesPresents}">
+                                    <td class="font-monospace" th:text="${v.immatriculationVehicule}">Plaque</td>
+                                    <td th:text="${v.numeroPlace}">Place</td>
+                                    <td class="text-muted small"
+                                        th:text="${#temporals.format(v.dateEntree, 'HH:mm')}">Heure</td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(vehiculesPresents)}">
+                                    <td class="text-muted">Aucun véhicule dans le parking.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historique -->
+    <h2 class="h5">Historique des passages</h2>
+    <form class="row g-2 align-items-end mb-3" method="get" th:action="@{/borne}">
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="immatriculation">Rechercher une plaque</label>
+            <input class="form-control" id="immatriculation" name="immatriculation"
+                   th:value="${immatriculationRecherchee}" placeholder="CD-AAA">
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="enCours">Stationnement</label>
+            <select class="form-select" id="enCours" name="enCours">
+                <option value="">Tous</option>
+                <option value="true" th:selected="${enCoursSelectionne != null and enCoursSelectionne}">En cours</option>
+                <option value="false" th:selected="${enCoursSelectionne != null and !enCoursSelectionne}">Terminé</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Filtrer</button>
+            <a class="btn btn-outline-secondary" th:href="@{/borne}">Réinitialiser</a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Véhicule</th>
+                <th>Place</th>
+                <th>Entrée</th>
+                <th>Sortie</th>
+                <th>Départ prévu</th>
+                <th class="text-end">Montant</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="es : ${page.content}">
+                <td th:text="${es.id}">1</td>
+                <td class="font-monospace" th:text="${es.immatriculationVehicule}">Plaque</td>
+                <td th:text="${es.numeroPlace}">A1</td>
+                <td th:text="${es.dateEntree != null ? #temporals.format(es.dateEntree, 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+                <td>
+                    <span th:if="${es.enCours}" class="badge text-bg-warning">En cours</span>
+                    <span th:unless="${es.enCours}"
+                          th:text="${#temporals.format(es.dateSortie, 'dd/MM/yyyy HH:mm')}">—</span>
+                </td>
+                <td th:text="${es.dateDepartPrevue != null ? #temporals.format(es.dateDepartPrevue, 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+                <td class="text-end fw-semibold"
+                    th:text="${es.montant != null ? #numbers.formatDecimal(es.montant, 1, 2) + ' Ar' : '—'}">—</td>
+            </tr>
+            <tr th:if="${page.totalElements == 0}">
+                <td colspan="7" class="text-center text-muted py-4">Aucun passage enregistré.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav th:if="${page.totalPages > 1}">
+        <ul class="pagination pagination-sm justify-content-center">
+            <li class="page-item" th:classappend="${page.first} ? 'disabled' : ''">
+                <a class="page-link"
+                   th:href="@{/borne(page=${page.number - 1}, enCours=${enCoursSelectionne}, immatriculation=${immatriculationRecherchee})}">Précédent</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                th:classappend="${i == page.number} ? 'active' : ''">
+                <a class="page-link"
+                   th:href="@{/borne(page=${i}, enCours=${enCoursSelectionne}, immatriculation=${immatriculationRecherchee})}"
+                   th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${page.last} ? 'disabled' : ''">
+                <a class="page-link"
+                   th:href="@{/borne(page=${page.number + 1}, enCours=${enCoursSelectionne}, immatriculation=${immatriculationRecherchee})}">Suivant</a>
+            </li>
+        </ul>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

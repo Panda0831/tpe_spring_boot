@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Statistiques')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="h3 mb-3">Rapports financiers et statistiques</h1>
+
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/statistiques}">
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="dateDebut">Du</label>
+            <input class="form-control" id="dateDebut" name="dateDebut" type="date" th:value="${dateDebut}">
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="dateFin">Au</label>
+            <input class="form-control" id="dateFin" name="dateFin" type="date" th:value="${dateFin}">
+        </div>
+        <div class="col-6 col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Actualiser</button>
+            <a class="btn btn-outline-secondary" th:href="@{/statistiques}">30 derniers jours</a>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Chiffre d'affaires</div>
+                <div class="kpi-valeur text-success"
+                     th:text="${#numbers.formatDecimal(revenus.chiffreAffairesTotal, 1, 2)} + ' Ar'">0 Ar</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Commission société</div>
+                <div class="kpi-valeur text-primary"
+                     th:text="${#numbers.formatDecimal(revenus.commissionTotale, 1, 2)} + ' Ar'">0 Ar</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Part chauffeurs</div>
+                <div class="kpi-valeur"
+                     th:text="${#numbers.formatDecimal(revenus.montantChauffeursTotal, 1, 2)} + ' Ar'">0 Ar</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Courses terminées</div>
+                <div class="kpi-valeur" th:text="${revenus.nombreCoursesTerminees}">0</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Revenu moyen / course</div>
+                <div class="kpi-valeur"
+                     th:text="${#numbers.formatDecimal(revenus.revenuMoyenParCourse, 1, 2)} + ' Ar'">0 Ar</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Taux d'annulation</div>
+                <div class="kpi-valeur text-warning"
+                     th:text="${#numbers.formatDecimal(activite.tauxAnnulation, 1, 2)} + ' %'">0 %</div>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- Histogramme du chiffre d'affaires -->
+    <div class="card mb-4">
+        <div class="card-header">Chiffre d'affaires journalier</div>
+        <div class="card-body">
+            <p th:if="${#lists.isEmpty(revenusParJour)}" class="text-muted mb-0">Aucune donnée sur la période.</p>
+            <div th:unless="${#lists.isEmpty(revenusParJour)}">
+                <div class="d-flex align-items-end gap-2" style="height: 180px;">
+                    <div th:each="r : ${revenusParJour}" class="text-center flex-fill d-flex flex-column justify-content-end h-100">
+                        <div class="small text-muted" th:text="${#numbers.formatDecimal(r.chiffreAffaires, 1, 0)} + ' Ar'">0 Ar</div>
+                        <div class="barre-revenu" th:style="'height: ' + ${r.pourcentage} + '%'"></div>
+                        <div class="small mt-1" th:text="${#temporals.format(r.jour, 'dd/MM')}">01/01</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <!-- Classement des chauffeurs -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Chiffre d'affaires par chauffeur</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                        <tr><th>Chauffeur</th><th class="text-end">Courses</th><th class="text-end">CA</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="c : ${revenus.caParChauffeur}">
+                            <td th:text="${c.nomChauffeur}">Nom</td>
+                            <td class="text-end" th:text="${c.nombreCourses}">0</td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(c.chiffreAffaires, 1, 2)} + ' Ar'">0 Ar</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(revenus.caParChauffeur)}">
+                            <td colspan="3" class="text-muted">Aucune course terminée sur la période.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classement des véhicules -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Chiffre d'affaires par véhicule</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                        <tr><th>Véhicule</th><th class="text-end">Courses</th><th class="text-end">CA</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="v : ${revenus.caParVehicule}">
+                            <td th:text="${v.immatriculation}">Plaque</td>
+                            <td class="text-end" th:text="${v.nombreCourses}">0</td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(v.chiffreAffaires, 1, 2)} + ' Ar'">0 Ar</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(revenus.caParVehicule)}">
+                            <td colspan="3" class="text-muted">Aucune course terminée sur la période.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activité -->
+    <div class="card mt-3">
+        <div class="card-header">Activité de la période</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Courses totales</span><strong th:text="${activite.totalCourses}">0</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Terminées / en cours / en attente</span>
+                            <strong>
+                                <span th:text="${activite.coursesTerminees}">0</span> /
+                                <span th:text="${activite.coursesEnCours}">0</span> /
+                                <span th:text="${activite.coursesEnAttente}">0</span>
+                            </strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Courses annulées</span><strong th:text="${activite.coursesAnnulees}">0</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Taux d'annulation</span>
+                            <strong th:text="${#numbers.formatDecimal(activite.tauxAnnulation, 1, 2)} + ' %'">0</strong>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Distance parcourue</span>
+                            <strong th:text="${#numbers.formatDecimal(activite.distanceTotaleKm, 1, 1)} + ' km'">0</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Revenu moyen par course</span>
+                            <strong th:text="${#numbers.formatDecimal(activite.revenuMoyenParCourse, 1, 2)} + ' Ar'">0 Ar</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Chauffeur le plus actif</span>
+                            <strong th:text="${activite.chauffeurPlusActif != null ? activite.chauffeurPlusActif + ' (' + activite.chauffeurPlusActifNbCourses + ')' : '—'}">—</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Véhicule le plus utilisé</span>
+                            <strong th:text="${activite.vehiculePlusUtilise != null ? activite.vehiculePlusUtilise + ' (' + activite.vehiculePlusUtiliseNbCourses + ')' : '—'}">—</strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer small text-muted"
+             th:if="${activite.periodeDebut != null and activite.periodeFin != null}">
+            Période analysée : du
+            <span th:text="${#temporals.format(activite.periodeDebut, 'dd/MM/yyyy HH:mm')}"></span>
+            au <span th:text="${#temporals.format(activite.periodeFin, 'dd/MM/yyyy HH:mm')}"></span>.
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

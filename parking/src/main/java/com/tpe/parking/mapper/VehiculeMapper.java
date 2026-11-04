@@ -1,55 +1,31 @@
 package com.tpe.parking.mapper;
 
-import com.tpe.parking.dto.UtilisateurDto;
-import com.tpe.parking.dto.VehiculeDto;
+import com.tpe.parking.dto.request.CreateVehiculeRequest;
+import com.tpe.parking.dto.response.VehiculeResponse;
 import com.tpe.parking.entity.Utilisateur;
 import com.tpe.parking.entity.Vehicule;
 
-public class VehiculeMapper {
+public final class VehiculeMapper {
 
     private VehiculeMapper() {
-        // Constructeur privé pour empêcher l'instanciation de cette classe utilitaire
     }
 
-
-    public static VehiculeDto toDto(Vehicule vehicule) {
+    public static VehiculeResponse toResponse(Vehicule vehicule) {
         if (vehicule == null) {
             return null;
         }
-
-        // Conversion du `long` immatriculation en `String` si le DTO attend une chaîne
-        String immatriculationStr = String.valueOf(vehicule.getImmatriculation());
-
-        return new VehiculeDto(
-                vehicule.getId(),
-                immatriculationStr,
-                vehicule.getMarque(),
-                vehicule.getModele(),
-                vehicule.getUtilisateur() != null ? UtilisateurDto.versDto(vehicule.getUtilisateur()) : null
-        );
+        return VehiculeResponse.fromEntity(vehicule);
     }
 
-
-    public static Vehicule toEntity(VehiculeDto dto, Utilisateur utilisateur) {
-        if (dto == null) {
+    public static Vehicule toEntity(CreateVehiculeRequest request, Utilisateur proprietaire) {
+        if (request == null) {
             return null;
         }
-
         Vehicule vehicule = new Vehicule();
-
-        vehicule.setId(dto.id());
-        vehicule.setMarque(dto.marque());
-        vehicule.setModele(dto.modele());
-        vehicule.setUtilisateur(utilisateur);
-
-        if (dto.immatriculation() != null && !dto.immatriculation().isBlank()) {
-            try {
-                vehicule.setImmatriculation(Long.parseLong(dto.immatriculation().trim()));
-            } catch (NumberFormatException e) {
-                vehicule.setImmatriculation(0L);
-            }
-        }
-
+        vehicule.setImmatriculation(request.immatriculation().trim().toUpperCase());
+        vehicule.setMarque(request.marque());
+        vehicule.setModele(request.modele());
+        vehicule.setUtilisateur(proprietaire);
         return vehicule;
     }
 }

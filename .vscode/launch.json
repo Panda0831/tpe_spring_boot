@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ParkingApplication<parking>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tpe.parking.ParkingApplication",
+            "projectName": "parking",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

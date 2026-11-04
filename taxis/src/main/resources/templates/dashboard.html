@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Tableau de bord')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="h3 mb-4">Tableau de bord</h1>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Courses du jour</div>
+                <div class="kpi-valeur text-primary" th:text="${activiteJour.totalCourses}">0</div>
+                <div class="small text-muted">
+                    <span th:text="${activiteJour.coursesEnCours}">0</span> en cours ·
+                    <span th:text="${activiteJour.coursesEnAttente}">0</span> en attente
+                </div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Chiffre d'affaires du jour</div>
+                <div class="kpi-valeur text-success"
+                     th:text="${#numbers.formatDecimal(revenusJour.chiffreAffairesTotal, 1, 2)} + ' Ar'">0 Ar</div>
+                <div class="small text-muted">
+                    commission <span th:text="${#numbers.formatDecimal(revenusJour.commissionTotale, 1, 2)} + ' Ar'">0 Ar</span> ·
+                    <span th:text="${revenusJour.nombreCoursesTerminees}">0</span> course(s) terminée(s)
+                </div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Taxis disponibles</div>
+                <div class="kpi-valeur text-info" th:text="${#lists.size(chauffeursDisponibles)}">0</div>
+                <div class="small text-muted">
+                    sur <span th:text="${#lists.size(chauffeurs)}">0</span> chauffeurs ·
+                    <span th:text="${#lists.size(vehiculesDisponibles)}">0</span> véhicule(s) libre(s)
+                </div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card kpi-card h-100"><div class="card-body">
+                <div class="text-muted small">Activité sur 30 jours</div>
+                <div class="kpi-valeur text-warning"
+                     th:text="${#numbers.formatDecimal(activite30Jours.tauxAnnulation, 1, 2)} + ' %'">0 %</div>
+                <div class="small text-muted">
+                    taux d'annulation ·
+                    <span th:text="${#numbers.formatDecimal(activite30Jours.distanceTotaleKm, 1, 1)}">0</span> km
+                </div>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <!-- Courses à traiter -->
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Courses à traiter</span>
+                    <a class="btn btn-sm btn-outline-primary" th:href="@{/courses}">Toutes les courses</a>
+                </div>
+                <div class="card-body p-0">
+                    <p th:if="${#lists.isEmpty(coursesATraiter)}" class="text-muted p-3 mb-0">
+                        Aucune course en attente : la flotte est à jour.
+                    </p>
+                    <div class="table-responsive" th:unless="${#lists.isEmpty(coursesATraiter)}">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Client</th>
+                                <th>Trajet</th>
+                                <th>Heure</th>
+                                <th>Chauffeur</th>
+                                <th>Statut</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="c : ${coursesATraiter}">
+                                <td th:text="${c.id}">1</td>
+                                <td th:text="${c.nomClient}">Client</td>
+                                <td>
+                                    <span th:text="${c.pointDepart}">Départ</span> →
+                                    <span th:text="${c.destination}">Arrivée</span>
+                                </td>
+                                <td th:text="${c.dateHeure != null ? #temporals.format(c.dateHeure, 'dd/MM HH:mm') : '—'}">—</td>
+                                <td th:text="${c.nomChauffeur != null ? c.nomChauffeur : 'à attribuer'}">—</td>
+                                <td><span class="pastille" th:classappend="${'pastille-' + c.statut}" th:text="${c.statut}">Statut</span></td>
+                                <td class="text-end">
+                                    <form method="post" th:action="@{'/courses/' + ${c.id} + '/dispatcher'}"
+                                          th:if="${peutOperer and c.statut.name() == 'EN_ATTENTE'}">
+                                        <button class="btn btn-sm btn-primary" type="submit">Dispatcher</button>
+                                    </form>
+                                    <form method="post" th:action="@{'/courses/' + ${c.id} + '/demarrer'}"
+                                          th:if="${peutOperer and c.statut.name() == 'ASSIGNEE'}">
+                                        <button class="btn btn-sm btn-primary" type="submit">Démarrer</button>
+                                    </form>
+                                    <form method="post" th:action="@{'/courses/' + ${c.id} + '/terminer'}"
+                                          th:if="${peutOperer and c.statut.name() == 'EN_COURS'}">
+                                        <button class="btn btn-sm btn-success" type="submit">Terminer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disponibilité -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">Disponibilité de la flotte</div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between">
+                        <span>Chauffeurs disponibles (permis valide)</span>
+                        <strong class="text-success" th:text="${#lists.size(chauffeursDisponibles)}">0</strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between">
+                        <span>Véhicules disponibles</span>
+                        <strong class="text-success" th:text="${#lists.size(vehiculesDisponibles)}">0</strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between">
+                        <span>Chauffeur le plus actif (30 j)</span>
+                        <strong th:text="${activite30Jours.chauffeurPlusActif != null ? activite30Jours.chauffeurPlusActif : '—'}">—</strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between">
+                        <span>Véhicule le plus utilisé (30 j)</span>
+                        <strong th:text="${activite30Jours.vehiculePlusUtilise != null ? activite30Jours.vehiculePlusUtilise : '—'}">—</strong>
+                    </div>
+                    <a class="list-group-item list-group-item-action" th:href="@{/flotte}">
+                        Voir la vue synoptique de la flotte
+                    </a>
+                    <a class="list-group-item list-group-item-action" th:href="@{/statistiques}">
+                        Rapports financiers et statistiques
+                    </a>
+                </div>
+                <div class="card-footer small text-muted">
+                    Revenu moyen par course (30 j) :
+                    <span th:text="${#numbers.formatDecimal(activite30Jours.revenuMoyenParCourse, 1, 2)} + ' Ar'">0 Ar</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

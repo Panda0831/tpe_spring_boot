@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Abonnements')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Abonnements</h1>
+        <span class="text-muted small" th:text="${page.totalElements} + ' abonnement(s)'">0</span>
+    </div>
+
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/abonnements}">
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="statut">Statut</label>
+            <select class="form-select" id="statut" name="statut">
+                <option value="">Tous les statuts</option>
+                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"
+                        th:selected="${s == statutSelectionne}">Statut</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Filtrer</button>
+            <a class="btn btn-outline-secondary" th:href="@{/abonnements}">Réinitialiser</a>
+        </div>
+    </form>
+
+    <div class="card mb-4" th:if="${peutGerer and not #lists.isEmpty(utilisateurs)}">
+        <div class="card-header">Souscrire un abonnement</div>
+        <div class="card-body">
+            <form class="row g-3" method="post" th:action="@{/abonnements}">
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="abUtilisateur">Utilisateur</label>
+                    <select class="form-select" id="abUtilisateur" name="utilisateurId" required>
+                        <option value="" disabled selected>Choisir un utilisateur</option>
+                        <option th:each="u : ${utilisateurs}" th:value="${u.id}"
+                                th:text="${u.prenom + ' ' + u.nom}">Utilisateur</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="abVehicule">Véhicule</label>
+                    <select class="form-select" id="abVehicule" name="vehiculeId" required>
+                        <option value="" disabled selected>Choisir un véhicule</option>
+                        <option th:each="v : ${vehicules}" th:value="${v.id}"
+                                th:text="${v.immatriculation}">Véhicule</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-2">
+                    <label class="form-label" for="abType">Type</label>
+                    <select class="form-select" id="abType" name="type" required>
+                        <option value="" disabled selected>Choisir un type</option>
+                        <option th:each="t : ${types}" th:value="${t}" th:text="${t}">Type</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="abDebut">Début</label>
+                    <input class="form-control" type="date" id="abDebut" name="dateDebut" required>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="abFin">Fin (optionnelle)</label>
+                    <input class="form-control" type="date" id="abFin" name="dateFin">
+                </div>
+                <div class="col-12 col-md-2 d-flex align-items-end">
+                    <button class="btn btn-success w-100" type="submit">Souscrire</button>
+                </div>
+            </form>
+            <p class="small text-muted mb-0 mt-2">
+                Sans date de fin, la durée est appliquée automatiquement selon le type
+                (journalier, hebdomadaire, mensuel, annuel).
+            </p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Utilisateur</th>
+                <th>Véhicule</th>
+                <th>Type</th>
+                <th>Début</th>
+                <th>Fin</th>
+                <th>Statut</th>
+                <th>Validité</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${page.content}">
+                <td th:text="${a.id}">1</td>
+                <td th:text="${a.nomUtilisateur}">Nom</td>
+                <td th:text="${a.immatriculationVehicule}">Plaque</td>
+                <td th:text="${a.type}">Type</td>
+                <td th:text="${a.dateDebut != null ? #temporals.format(a.dateDebut, 'dd/MM/yyyy') : '—'}">Date</td>
+                <td th:text="${a.dateFin != null ? #temporals.format(a.dateFin, 'dd/MM/yyyy') : '—'}">Date</td>
+                <td><span class="pastille" th:classappend="${'pastille-' + a.statut}" th:text="${a.statut}">Statut</span></td>
+                <td>
+                    <span class="badge text-bg-success" th:if="${a.estValide}">Valide</span>
+                    <span class="badge text-bg-secondary" th:unless="${a.estValide}">Non valide</span>
+                </td>
+                <td class="text-end">
+                    <div class="d-flex gap-1 justify-content-end" th:if="${peutGerer}">
+                        <form method="post" th:action="@{'/abonnements/' + ${a.id} + '/renouveler'}" class="d-flex gap-1">
+                            <input class="form-control form-control-sm date-renouvellement"
+                                   type="date" name="nouvelleDateFin"
+                                   style="width: 9rem" th:title="'Nouvelle date de fin (optionnelle)'">
+                            <button class="btn btn-sm btn-outline-primary" type="submit"
+                                    th:title="'Prolonger automatiquement selon le type si la date est vide'">Renouveler</button>
+                        </form>
+                        <form method="post" th:action="@{'/abonnements/' + ${a.id} + '/resilier'}" th:if="${estAdmin}">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">Résilier</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${page.totalElements == 0}">
+                <td colspan="9" class="text-center text-muted py-4">Aucun abonnement pour ces critères.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav th:if="${page.totalPages > 1}">
+        <ul class="pagination pagination-sm justify-content-center">
+            <li class="page-item" th:classappend="${page.first} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/abonnements(page=${page.number - 1}, statut=${statutSelectionne})}">Précédent</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                th:classappend="${i == page.number} ? 'active' : ''">
+                <a class="page-link" th:href="@{/abonnements(page=${i}, statut=${statutSelectionne})}"
+                   th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${page.last} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/abonnements(page=${page.number + 1}, statut=${statutSelectionne})}">Suivant</a>
+            </li>
+        </ul>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    const subscriptionStart = document.getElementById('abDebut');
+    const subscriptionEnd = document.getElementById('abFin');
+    if (subscriptionStart && subscriptionEnd) {
+        subscriptionEnd.addEventListener('change', () => {
+            subscriptionEnd.setCustomValidity(
+                subscriptionEnd.value && subscriptionEnd.value <= subscriptionStart.value
+                    ? 'La date de fin doit être postérieure à la date de début.'
+                    : ''
+            );
+        });
+        subscriptionStart.addEventListener('change', () => {
+            subscriptionEnd.min = subscriptionStart.value;
+            subscriptionEnd.dispatchEvent(new Event('change'));
+        });
+    }
+    const today = new Date();
+    today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+    document.querySelectorAll('.date-renouvellement').forEach(input => {
+        input.min = today.toISOString().slice(0, 10);
+    });
+</script>
+</body>
+</html>

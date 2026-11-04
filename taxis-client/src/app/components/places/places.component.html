@@ -1,0 +1,80 @@
+<div class="places-container">
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">Gestion des Places</h5>
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <select class="form-control" [(ngModel)]="filtrage.zone">
+            <option value="">Toutes zones</option>
+            @for (zone of zones; track zone) { <option [value]="zone">{{ zone }}</option }</select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-control" [(ngModel)]="filtrage.type">
+            <option value="">Tous types</option>
+            @for (type of ['LIBRE', 'OCCUPÉE', 'RÉSERVÉE', 'VIP', 'PMR']; track type) { 
+              <option [value]="type">{{ type }}</option }
+            }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-control" [(ngModel)]="filtrage.statut">
+            <option value="">Tous statuts</option>
+            @for (statut of ['LIBRE', 'OCCUPÉE', 'RÉSERVÉE', 'VIP', 'PMR']; track statut) { 
+              <option [value]="statut">{{ statut }}</option }
+            }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-primary w-100" (click)="loadPlaces()">
+            <i class="bi bi-arrow-clockwise me-2"></i>Actualiser
+          </button>
+        </div>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Zone</th>
+              <th>Type</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (place of getPlacesFiltrees(); track place) {
+              <tr [ngClass]="{
+                'table-success': place.statut === 'LIBRE',
+                'table-warning': place.statut === 'RÉSERVÉE',
+                'table-danger': place.statut === 'OCCUPÉE',
+                'table-info': place.statut === 'VIP',
+                'table-secondary': place.statut === 'PMR'
+              }">
+                <td>{{ place.numero }}</td>
+                <td>{{ place.zone }}</td>
+                <td>{{ place.type }}</td>
+                <td>
+                  <span class="badge bg-{{ place.statut === 'LIBRE' ? 'success' : place.statut === 'OCCUPÉE' ? 'danger' : place.statut === 'RÉSERVÉE' ? 'warning' : place.statut === 'VIP' ? 'info' : 'secondary' }}">
+                    {{ place.statut }}
+                  </span>
+                </td>
+                <td>
+                  @if (place.statut === 'LIBRE') {
+                    <button class="btn btn-sm btn-outline-success">Assigner</button>
+                  } @else {
+                    <span class="text-muted">Occupée</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="text-center">Aucune place trouvée</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

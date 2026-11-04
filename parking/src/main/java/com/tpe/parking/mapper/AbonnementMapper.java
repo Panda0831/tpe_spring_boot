@@ -1,42 +1,46 @@
 package com.tpe.parking.mapper;
 
-import com.tpe.parking.dto.AbonnementDto;
+import com.tpe.parking.dto.request.CreateAbonnementRequest;
+import com.tpe.parking.dto.response.AbonnementResponse;
 import com.tpe.parking.entity.Abonnement;
-import com.tpe.parking.entity.AbonnementType;
+import com.tpe.parking.entity.AbonnementStatut;
+import com.tpe.parking.entity.Utilisateur;
+import com.tpe.parking.entity.Vehicule;
 
-import java.time.LocalDate;
+public final class AbonnementMapper {
 
-public class AbonnementMapper {
     private AbonnementMapper() {
     }
 
-    public static AbonnementDto toDto(Abonnement abonnement) {
+    public static AbonnementResponse toResponse(Abonnement abonnement) {
         if (abonnement == null) {
             return null;
         }
-        return new AbonnementDto(
-                abonnement.getId(),
-                abonnement.getType() != null ? abonnement.getType().name() : null,
-                abonnement.getVehicule(),
-                abonnement.getStatut() != null ? abonnement.getStatut().name() : null,
-                abonnement.getUtilisateur(),
-                abonnement.getDateDebut() != null ? abonnement.getDateDebut().toString() : null,
-                abonnement.getDateFin() != null ? abonnement.getDateFin().toString() : null
-        );
+        return AbonnementResponse.fromEntity(abonnement);
     }
 
-    public static Abonnement toEntity(AbonnementDto abonnementDto) {
-        if (abonnementDto == null) {
+    public static Abonnement toEntity(CreateAbonnementRequest request, Utilisateur utilisateur, Vehicule vehicule) {
+        if (request == null) {
             return null;
         }
         Abonnement abonnement = new Abonnement();
-        abonnement.setId(abonnementDto.getId());
-        abonnement.setType(abonnementDto.getType() != null ? Enum.valueOf(AbonnementType.class, abonnementDto.getType()) : null);
-        abonnement.setVehicule(abonnementDto.getVehicule());
-        abonnement.setUtilisateur(abonnementDto.getUtilisateur());
-        abonnement.setDateDebut(abonnementDto.getDateDebut() != null ? LocalDate.parse(abonnementDto.getDateDebut()) : null);
-        abonnement.setDateFin(abonnementDto.getDateFin() != null ? LocalDate.parse(abonnementDto.getDateFin()) : null);
+        abonnement.setUtilisateur(utilisateur);
+        abonnement.setVehicule(vehicule);
+        abonnement.setType(request.type());
+        abonnement.setDateDebut(request.dateDebut());
+
+        if (request.dateFin() != null) {
+            abonnement.setDateFin(request.dateFin());
+        } else if (request.dateDebut() != null && request.type() != null) {
+            switch (request.type()) {
+                case JOURNALIER -> abonnement.setDateFin(request.dateDebut());
+                case HEBDOMADAIRE -> abonnement.setDateFin(request.dateDebut().plusWeeks(1));
+                case MENSUEL -> abonnement.setDateFin(request.dateDebut().plusMonths(1));
+                case ANNUEL -> abonnement.setDateFin(request.dateDebut().plusYears(1));
+            }
+        }
+
+        abonnement.setStatut(AbonnementStatut.ACTIF);
         return abonnement;
     }
 }
-

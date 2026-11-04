@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Clients')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Clients</h1>
+        <span class="text-muted small" th:text="${page.totalElements} + ' client(s)'">0</span>
+    </div>
+
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/clients}">
+        <div class="col-8 col-md-4">
+            <label class="form-label mb-1" for="recherche">Recherche</label>
+            <input class="form-control" id="recherche" name="recherche" th:value="${recherche}"
+                   placeholder="Nom, prénom, téléphone ou email">
+        </div>
+        <div class="col-4 col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Rechercher</button>
+            <a class="btn btn-outline-secondary" th:href="@{/clients}">Réinitialiser</a>
+        </div>
+    </form>
+
+    <!-- Création d'un client (OPERATOR / MANAGER / ADMIN) -->
+    <div class="card mb-4" th:if="${peutOperer}">
+        <div class="card-header">Nouveau client</div>
+        <div class="card-body">
+            <form class="row g-3" method="post" th:action="@{/clients}">
+                <div class="col-12 col-md-3">
+                    <label class="form-label" for="nom">Nom *</label>
+                    <input class="form-control" id="nom" name="nom" minlength="2" maxlength="50"
+                           required placeholder="Dupont">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" for="prenom">Prénom</label>
+                    <input class="form-control" id="prenom" name="prenom" maxlength="50" placeholder="Jean">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" for="telephone">Téléphone *</label>
+                    <input class="form-control" id="telephone" name="telephone" type="tel" inputmode="tel"
+                           pattern="(\+?[0-9]{1,4}[ -]?)?[0-9]{6,14}" title="Saisissez un numéro de téléphone valide."
+                           autocomplete="tel" required placeholder="+243810000000">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" for="email">Email</label>
+                    <input class="form-control" id="email" name="email" type="email" placeholder="jean.dupont@email.cd">
+                </div>
+                <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-success" type="submit">Enregistrer le client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tableau des clients -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Nom complet</th>
+                <th>Téléphone</th>
+                <th>Email</th>
+                <th class="text-end" th:if="${peutGerer}">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${page.content}">
+                <td th:text="${c.id}">1</td>
+                <td>
+                    <strong th:text="${c.nomComplet}">Nom Prénom</strong>
+                </td>
+                <td>
+                    <span class="badge text-bg-light" th:text="${c.telephone}">+243810000000</span>
+                </td>
+                <td th:text="${c.email != null ? c.email : '—'}">—</td>
+                <td class="text-end" th:if="${peutGerer}">
+                    <div class="d-inline-flex gap-1">
+                        <button class="btn btn-sm btn-outline-primary" type="button"
+                                data-bs-toggle="collapse"
+                                th:attr="data-bs-target='#edit-' + ${c.id}">
+                            Modifier
+                        </button>
+                        <form th:if="${estAdmin}" th:action="@{/clients/{id}/supprimer(id=${c.id})}"
+                              method="post" onsubmit="return confirm('Supprimer ce client ?');">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
+                        </form>
+                    </div>
+
+                    <!-- Formulaire d'édition repliable -->
+                    <div class="collapse mt-2 text-start" th:id="'edit-' + ${c.id}">
+                        <div class="card card-body bg-light">
+                            <form class="row g-2" th:action="@{/clients/{id}(id=${c.id})}" method="post">
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small mb-0">Nom</label>
+                                    <input class="form-control form-control-sm" name="nom" minlength="2" maxlength="50"
+                                           th:value="${c.nom}" required>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small mb-0">Prénom</label>
+                                    <input class="form-control form-control-sm" name="prenom" maxlength="50" th:value="${c.prenom}">
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small mb-0">Téléphone</label>
+                                    <input class="form-control form-control-sm" name="telephone" type="tel" inputmode="tel"
+                                           pattern="(\+?[0-9]{1,4}[ -]?)?[0-9]{6,14}"
+                                           title="Saisissez un numéro de téléphone valide."
+                                           autocomplete="tel" th:value="${c.telephone}" required>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small mb-0">Email</label>
+                                    <input class="form-control form-control-sm" name="email" type="email" th:value="${c.email}">
+                                </div>
+                                <div class="col-12 text-end mt-2">
+                                    <button class="btn btn-sm btn-primary" type="submit">Sauvegarder</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${page.empty}">
+                <td colspan="5" class="text-center text-muted py-4">Aucun client trouvé.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${page.totalPages > 1}" class="d-flex justify-content-center mt-3">
+        <ul class="pagination pagination-sm">
+            <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+                <a class="page-link" th:href="@{/clients(page=${page.number - 1}, recherche=${recherche})}">Précédent</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                th:classappend="${i == page.number} ? 'active'">
+                <a class="page-link" th:text="${i + 1}"
+                   th:href="@{/clients(page=${i}, recherche=${recherche})}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+                <a class="page-link" th:href="@{/clients(page=${page.number + 1}, recherche=${recherche})}">Suivant</a>
+            </li>
+        </ul>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

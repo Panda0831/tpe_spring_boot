@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Véhicules')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Véhicules</h1>
+        <span class="text-muted small" th:text="${page.totalElements} + ' véhicule(s)'">0</span>
+    </div>
+
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/vehicules}">
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="recherche">Marque ou modèle</label>
+            <input class="form-control" id="recherche" name="recherche" th:value="${recherche}" placeholder="Toyota">
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="statut">Statut</label>
+            <select class="form-select" id="statut" name="statut">
+                <option value="">Tous les statuts</option>
+                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"
+                        th:selected="${s == statutSelectionne}">Statut</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Rechercher</button>
+            <a class="btn btn-outline-secondary" th:href="@{/vehicules}">Réinitialiser</a>
+        </div>
+    </form>
+
+    <div class="card mb-4" th:if="${peutGerer}">
+        <div class="card-header">Enregistrer un véhicule</div>
+        <div class="card-body">
+            <form class="row g-3" method="post" th:action="@{/vehicules}">
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="immatriculation">Immatriculation</label>
+                    <input class="form-control text-uppercase" id="immatriculation" name="immatriculation"
+                           minlength="2" maxlength="20" required
+                           placeholder="CD-006-KL">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="marque">Marque</label>
+                    <input class="form-control" id="marque" name="marque" maxlength="50" required>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="modele">Modèle</label>
+                    <input class="form-control" id="modele" name="modele" maxlength="50" required>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="annee">Année</label>
+                    <input class="form-control" id="annee" name="annee" type="number" min="1900" max="2100">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="capacite">Capacité</label>
+                    <input class="form-control" id="capacite" name="capacite" type="number" min="1" max="20" required>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="kilometrage">Kilométrage</label>
+                    <input class="form-control" id="kilometrage" name="kilometrage" type="number" step="any" min="0">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" for="chauffeurId">Chauffeur affecté</label>
+                    <select class="form-select" id="chauffeurId" name="chauffeurId">
+                        <option value="">Aucun</option>
+                        <option th:each="ch : ${chauffeurs}" th:value="${ch.id}"
+                                th:text="${ch.nomComplet + ' — ' + ch.numeroPermis}">Chauffeur</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-3 d-flex align-items-end">
+                    <button class="btn btn-success w-100" type="submit">Enregistrer</button>
+                </div>
+            </form>
+            <p class="small text-muted mb-0 mt-2">
+                Un véhicule en <code>MAINTENANCE</code> ou <code>HORS_SERVICE</code> est automatiquement exclu
+                du dispatch automatique.
+            </p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Immatriculation</th>
+                <th>Marque / modèle</th>
+                <th>Année</th>
+                <th class="text-end">Capacité</th>
+                <th class="text-end">Kilométrage</th>
+                <th>Chauffeur</th>
+                <th>Statut</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="v : ${page.content}">
+                <td th:text="${v.id}">1</td>
+                <td class="fw-semibold" th:text="${v.immatriculation}">Plaque</td>
+                <td th:text="${v.marque + ' ' + v.modele}">Marque</td>
+                <td th:text="${v.annee}">2022</td>
+                <td class="text-end" th:text="${v.capacite}">4</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(v.kilometrage, 1, 0)}">0</td>
+                <td th:text="${v.nomChauffeur != null ? v.nomChauffeur : '—'}">—</td>
+                <td><span class="pastille" th:classappend="${'pastille-' + v.statut}" th:text="${v.statut}">Statut</span></td>
+                <td>
+                    <div class="d-flex flex-column gap-1 align-items-end" th:if="${peutGerer}">
+                        <form class="d-flex gap-1" method="post" th:action="@{'/vehicules/' + ${v.id}}">
+                            <input class="form-control form-control-sm" name="kilometrage" type="number" step="any" min="0"
+                                   style="width: 8rem" th:value="${v.kilometrage}" placeholder="Km">
+                            <button class="btn btn-sm btn-outline-primary" type="submit">Km</button>
+                        </form>
+                        <form class="d-flex gap-1" method="post" th:action="@{'/vehicules/' + ${v.id} + '/statut'}">
+                            <select class="form-select form-select-sm" name="statut" style="width: 10rem" required>
+                                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"
+                                        th:selected="${s == v.statut}">Statut</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-secondary" type="submit">Changer</button>
+                        </form>
+                        <form class="d-flex gap-1" method="post" th:action="@{'/vehicules/' + ${v.id} + '/chauffeur'}">
+                            <select class="form-select form-select-sm" name="chauffeurId" style="width: 10rem">
+                                <option value="">Retirer le chauffeur</option>
+                                <option th:each="ch : ${chauffeurs}" th:value="${ch.id}"
+                                        th:text="${ch.nomComplet}" th:selected="${ch.id == v.chauffeurId}">Chauffeur</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-secondary" type="submit">Affecter</button>
+                        </form>
+                        <form method="post" th:action="@{'/vehicules/' + ${v.id} + '/supprimer'}" th:if="${estAdmin}">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${page.totalElements == 0}">
+                <td colspan="9" class="text-center text-muted py-4">Aucun véhicule pour ces critères.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav th:if="${page.totalPages > 1}">
+        <ul class="pagination pagination-sm justify-content-center">
+            <li class="page-item" th:classappend="${page.first} ? 'disabled' : ''">
+                <a class="page-link"
+                   th:href="@{/vehicules(page=${page.number - 1}, recherche=${recherche}, statut=${statutSelectionne})}">Précédent</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                th:classappend="${i == page.number} ? 'active' : ''">
+                <a class="page-link"
+                   th:href="@{/vehicules(page=${i}, recherche=${recherche}, statut=${statutSelectionne})}"
+                   th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${page.last} ? 'disabled' : ''">
+                <a class="page-link"
+                   th:href="@{/vehicules(page=${page.number + 1}, recherche=${recherche}, statut=${statutSelectionne})}">Suivant</a>
+            </li>
+        </ul>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

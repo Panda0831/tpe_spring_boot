@@ -1,0 +1,65 @@
+<div class="reservations-container">
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">Réservations</h5>
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <select class="form-control" [(ngModel)]="filtrerPar">
+            <option value="tous">Toutes les reservations</option>
+            @for (statut of statutOptions; track statut) { 
+              <option [value]="statut">{{ statut }}</option }
+            }
+          </select>
+        </div>
+        <div class="col-md-4">
+          <input type="text" class="form-control" placeholder="Rechercher par utilisateur...">
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-primary w-100">Nouvelle réservation</button>
+        </div>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Utilisateur</th>
+              <th>Place</th>
+              <th>Date Arrivée</th>
+              <th>Date Départ</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (reservation of reservations; track reservation) {
+              <tr>
+                <td>{{ reservation.id }}</td>
+                <td>{{ reservation.utilisateur?.nom || 'N/A' }}</td>
+                <td>{{ reservation.place?.numero || 'N/A' }}</td>
+                <td>{{ reservation.dateArriveePrevue | date:'short' }}</td>
+                <td>{{ reservation.dateDepartPrevue | date:'short' }}</td>
+                <td>
+                  <span class="badge bg-{{ reservation.statut === 'EN_ATTENTE' ? 'warning' : reservation.statut === 'CONFIRMEE' ? 'success' : 'danger' }}">
+                    {{ reservation.statut }}
+                  </span>
+                </td>
+                <td>
+                  @if (authService.getRole() === 'ADMIN' || authService.getRole() === 'MANAGER') {
+                    <button class="btn btn-sm btn-outline-primary">Modifier</button>
+                    <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="text-center">Aucune réservation trouvée</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

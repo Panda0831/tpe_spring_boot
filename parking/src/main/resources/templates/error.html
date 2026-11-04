@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Erreur')}"></head>
+<body class="bg-light">
+<div class="container" style="max-width: 640px; margin-top: 8vh;">
+    <div class="card border-danger shadow-sm">
+        <div class="card-body p-4">
+            <h1 class="h4 text-danger mb-3">
+                Erreur <span th:text="${status} ?: 'inattendue'">500</span>
+            </h1>
+            <p class="mb-2" th:text="${error} ?: 'Une erreur est survenue.'">Une erreur est survenue.</p>
+            <p class="text-muted" th:if="${message != null and message != ''}" th:text="${message}"></p>
+            <p class="small text-muted" th:if="${path != null}">
+                Page demandée : <code th:text="${path}"></code>
+            </p>
+            <a class="btn btn-primary" th:href="@{/dashboard}">Retour au tableau de bord</a>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

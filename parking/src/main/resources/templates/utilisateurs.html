@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Utilisateurs')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Utilisateurs</h1>
+        <span class="text-muted small" th:text="${page.totalElements} + ' utilisateur(s)'">0</span>
+    </div>
+
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/utilisateurs}">
+        <div class="col-8 col-md-4">
+            <label class="form-label mb-1" for="recherche">Recherche</label>
+            <input class="form-control" id="recherche" name="recherche" th:value="${recherche}"
+                   placeholder="Nom, prénom ou email">
+        </div>
+        <div class="col-4 col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Rechercher</button>
+            <a class="btn btn-outline-secondary" th:href="@{/utilisateurs}">Réinitialiser</a>
+        </div>
+    </form>
+
+    <!-- Création d'un utilisateur (MANAGER / ADMIN) -->
+    <div class="card mb-4" th:if="${peutGerer}">
+        <div class="card-header bg-dark text-white">Nouvel utilisateur</div>
+        <div class="card-body">
+            <form class="row g-3" method="post" th:action="@{/utilisateurs}">
+                <div class="col-12 col-md-2">
+                    <label class="form-label" for="nom">Nom *</label>
+                    <input class="form-control" id="nom" name="nom" minlength="2" maxlength="50"
+                           required placeholder="Dubois">
+                </div>
+                <div class="col-12 col-md-2">
+                    <label class="form-label" for="prenom">Prénom</label>
+                    <input class="form-control" id="prenom" name="prenom" minlength="2" maxlength="50" placeholder="Marc">
+                </div>
+                <div class="col-12 col-md-2">
+                    <label class="form-label" for="telephone">Téléphone *</label>
+                    <input class="form-control" id="telephone" name="telephone" type="tel"
+                           pattern="(?:0[0-9]{9}|\+?[1-9][0-9]{7,14})" minlength="8" maxlength="16" required
+                           title="Saisissez un numéro local de 10 chiffres ou un numéro international de 8 à 15 chiffres"
+                           placeholder="+243900000001">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" for="email">Email *</label>
+                    <input class="form-control" id="email" name="email" type="email" maxlength="254"
+                           required placeholder="marc.dubois@parking.com">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="role">Rôle</label>
+                    <select class="form-select" id="role" name="role">
+                        <option th:each="r : ${roles}" th:value="${r}" th:text="${r}">USER</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-1 d-flex align-items-end">
+                    <button class="btn btn-success w-100" type="submit">Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tableau des utilisateurs -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Nom complet</th>
+                <th>Téléphone</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th class="text-end" th:if="${estAdmin}">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="u : ${page.content}">
+                <td th:text="${u.id}">1</td>
+                <td>
+                    <strong th:text="${u.nom} + ' ' + ${u.prenom != null ? u.prenom : ''}">Nom</strong>
+                </td>
+                <td>
+                    <span class="badge text-bg-light" th:text="${u.telephone}">0600000000</span>
+                </td>
+                <td th:text="${u.email}">email@parking.com</td>
+                <td>
+                    <span class="badge"
+                          th:classappend="${u.role.name() == 'ADMIN'} ? 'text-bg-danger' : (${u.role.name() == 'MANAGER'} ? 'text-bg-warning' : (${u.role.name() == 'OPERATOR'} ? 'text-bg-info' : 'text-bg-secondary'))"
+                          th:text="${u.role}">USER</span>
+                </td>
+                <td class="text-end" th:if="${estAdmin}">
+                    <form th:action="@{/utilisateurs/{id}/supprimer(id=${u.id})}" method="post"
+                          onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${page.empty}">
+                <td colspan="6" class="text-center text-muted py-4">Aucun utilisateur trouvé.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${page.totalPages > 1}" class="d-flex justify-content-center mt-3">
+        <ul class="pagination pagination-sm">
+            <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+                <a class="page-link" th:href="@{/utilisateurs(page=${page.number - 1}, recherche=${recherche})}">Précédent</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                th:classappend="${i == page.number} ? 'active'">
+                <a class="page-link" th:text="${i + 1}"
+                   th:href="@{/utilisateurs(page=${i}, recherche=${recherche})}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+                <a class="page-link" th:href="@{/utilisateurs(page=${page.number + 1}, recherche=${recherche})}">Suivant</a>
+            </li>
+        </ul>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

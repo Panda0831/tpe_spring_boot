@@ -1,0 +1,397 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+    <head th:replace="~{fragments/layout :: head('Chauffeurs')}"></head>
+    <body>
+        <nav th:replace="~{fragments/layout :: nav}"></nav>
+        <div th:replace="~{fragments/layout :: flash}"></div>
+
+        <main class="container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="h3 mb-0">Chauffeurs</h1>
+                <span
+                    class="text-muted small"
+                    th:text="${page.totalElements} + ' chauffeur(s)'"
+                    >0</span
+                >
+            </div>
+
+            <form
+                class="row g-2 align-items-end mb-4"
+                method="get"
+                th:action="@{/chauffeurs}"
+            >
+                <div class="col-6 col-md-3">
+                    <label class="form-label mb-1" for="recherche"
+                        >Nom ou prénom</label
+                    >
+                    <input
+                        class="form-control"
+                        id="recherche"
+                        name="recherche"
+                        th:value="${recherche}"
+                        placeholder="Kabasele"
+                    />
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label mb-1" for="statut">Statut</label>
+                    <select class="form-select" id="statut" name="statut">
+                        <option value="">Tous les statuts</option>
+                        <option
+                            th:each="s : ${statuts}"
+                            th:value="${s}"
+                            th:text="${s}"
+                            th:selected="${s == statutSelectionne}"
+                        >
+                            Statut
+                        </option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-3 d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">
+                        Rechercher
+                    </button>
+                    <a
+                        class="btn btn-outline-secondary"
+                        th:href="@{/chauffeurs}"
+                        >Réinitialiser</a
+                    >
+                </div>
+            </form>
+
+            <!-- Création d'un chauffeur (MANAGER+) -->
+            <div class="card mb-4" th:if="${peutGerer}">
+                <div class="card-header">Enregistrer un chauffeur</div>
+                <div class="card-body">
+                    <form
+                        class="row g-3"
+                        method="post"
+                        th:action="@{/chauffeurs}"
+                    >
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" for="nom">Nom</label>
+                            <input
+                                class="form-control"
+                                id="nom"
+                                name="nom"
+                                minlength="2"
+                                maxlength="50"
+                                required
+                            />
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" for="prenom"
+                                >Prénom</label
+                            >
+                            <input
+                                class="form-control"
+                                id="prenom"
+                                name="prenom"
+                                minlength="2"
+                                maxlength="50"
+                                required
+                            />
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" for="telephone"
+                                >Téléphone</label
+                            >
+                            <input
+                                class="form-control"
+                                id="telephone"
+                                name="telephone"
+                                type="tel"
+                                inputmode="tel"
+                                pattern="(\+?[0-9]{1,4}[ -]?)?[0-9]{6,14}"
+                                title="Saisissez un numéro de téléphone valide."
+                                required
+                                placeholder="+243970000001"
+                            />
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" for="numeroPermis"
+                                >Numéro de permis</label
+                            >
+                            <input
+                                class="form-control"
+                                id="numeroPermis"
+                                name="numeroPermis"
+                                minlength="3"
+                                maxlength="30"
+                                required
+                                placeholder="PERM-006"
+                            />
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" for="dateExpirationPermis"
+                                >Expiration du permis</label
+                            >
+                            <input
+                                class="form-control"
+                                id="dateExpirationPermis"
+                                name="dateExpirationPermis"
+                                type="date"
+                                required
+                            />
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <label class="form-label" for="dateEmbauche"
+                                >Date d'embauche</label
+                            >
+                            <input
+                                class="form-control"
+                                id="dateEmbauche"
+                                name="dateEmbauche"
+                                type="date"
+                            />
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" for="vehiculeId"
+                                >Véhicule affecté</label
+                            >
+                            <select
+                                class="form-select"
+                                id="vehiculeId"
+                                name="vehiculeId"
+                            >
+                                <option value="">Aucun</option>
+                                <option
+                                    th:each="v : ${vehicules}"
+                                    th:value="${v.id}"
+                                    th:text="${v.immatriculation + ' — ' + v.marque + ' ' + v.modele}"
+                                >
+                                    Véhicule
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3 d-flex align-items-end">
+                            <button class="btn btn-success w-100" type="submit">
+                                Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                    <p class="small text-muted mb-0 mt-2">
+                        Un permis expiré bloque automatiquement la réception de
+                        courses : le chauffeur n'apparaît plus dans les
+                        chauffeurs éligibles.
+                    </p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Chauffeur</th>
+                            <th>Téléphone</th>
+                            <th>Permis</th>
+                            <th>Expiration</th>
+                            <th>Embauche</th>
+                            <th>Véhicule</th>
+                            <th>Statut</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="ch : ${page.content}">
+                            <td th:text="${ch.id}">1</td>
+                            <td class="fw-semibold" th:text="${ch.nomComplet}">
+                                Nom
+                            </td>
+                            <td th:text="${ch.telephone}">Téléphone</td>
+                            <td th:text="${ch.numeroPermis}">Permis</td>
+                            <td>
+                                <span
+                                    th:text="${ch.dateExpirationPermis != null ? #temporals.format(ch.dateExpirationPermis, 'dd/MM/yyyy') : '—'}"
+                                    >—</span
+                                >
+                                <span
+                                    class="badge text-bg-danger ms-1"
+                                    th:unless="${ch.permisValide}"
+                                    >Expiré</span
+                                >
+                                <span
+                                    class="badge text-bg-warning ms-1"
+                                    th:if="${ch.permisValide and ch.dateExpirationPermis != null and ch.dateExpirationPermis.isBefore(dateAlertePermis)}"
+                                >
+                                    Bientôt expiré
+                                </span>
+                            </td>
+                            <td
+                                th:text="${ch.dateEmbauche != null ? #temporals.format(ch.dateEmbauche, 'dd/MM/yyyy') : '—'}"
+                            >
+                                —
+                            </td>
+                            <td
+                                th:text="${ch.vehiculeImmatriculation != null ? ch.vehiculeImmatriculation : '—'}"
+                            >
+                                —
+                            </td>
+                            <td>
+                                <span
+                                    class="pastille"
+                                    th:classappend="${'pastille-' + ch.statut}"
+                                    th:text="${ch.statut}"
+                                    >Statut</span
+                                >
+                            </td>
+                            <td>
+                                <div
+                                    class="d-flex flex-column gap-1 align-items-end"
+                                    th:if="${peutGerer}"
+                                >
+                                    <!-- Mise à jour rapide : téléphone et expiration du permis -->
+                                    <form
+                                        class="d-flex gap-1"
+                                        method="post"
+                                        th:action="@{'/chauffeurs/' + ${ch.id}}"
+                                    >
+                                        <input
+                                            class="form-control form-control-sm"
+                                            name="telephone"
+                                            type="tel"
+                                            inputmode="tel"
+                                            pattern="(\+?[0-9]{1,4}[ -]?)?[0-9]{6,14}"
+                                            title="Saisissez un numéro de téléphone valide."
+                                            style="width: 10rem"
+                                            th:value="${ch.telephone}"
+                                            th:placeholder="'Téléphone'"
+                                            required
+                                        />
+                                        <input
+                                            class="form-control form-control-sm"
+                                            name="dateExpirationPermis"
+                                            type="date"
+                                            style="width: 10rem"
+                                            th:value="${ch.dateExpirationPermis}"
+                                        />
+                                        <button
+                                            class="btn btn-sm btn-outline-primary"
+                                            type="submit"
+                                        >
+                                            Mettre à jour
+                                        </button>
+                                    </form>
+                                    <!-- Statut -->
+                                    <form
+                                        class="d-flex gap-1"
+                                        method="post"
+                                        th:action="@{'/chauffeurs/' + ${ch.id} + '/statut'}"
+                                    >
+                                        <select
+                                            class="form-select form-select-sm"
+                                            name="statut"
+                                            style="width: 10rem"
+                                        >
+                                            <option
+                                                th:each="s : ${statuts}"
+                                                th:value="${s}"
+                                                th:text="${s}"
+                                                th:selected="${s == ch.statut}"
+                                            >
+                                                Statut
+                                            </option>
+                                        </select>
+                                        <button
+                                            class="btn btn-sm btn-outline-secondary"
+                                            type="submit"
+                                        >
+                                            Changer
+                                        </button>
+                                    </form>
+                                    <!-- Véhicule affecté -->
+                                    <form
+                                        class="d-flex gap-1"
+                                        method="post"
+                                        th:action="@{'/chauffeurs/' + ${ch.id} + '/vehicule'}"
+                                    >
+                                        <select
+                                            class="form-select form-select-sm"
+                                            name="vehiculeId"
+                                            style="width: 10rem"
+                                        >
+                                            <option value="">
+                                                Retirer le véhicule
+                                            </option>
+                                            <option
+                                                th:each="v : ${vehicules}"
+                                                th:value="${v.id}"
+                                                th:text="${v.immatriculation}"
+                                                th:selected="${v.id == ch.vehiculeId}"
+                                            >
+                                                Véhicule
+                                            </option>
+                                        </select>
+                                        <button
+                                            class="btn btn-sm btn-outline-secondary"
+                                            type="submit"
+                                        >
+                                            Affecter
+                                        </button>
+                                    </form>
+                                    <form
+                                        method="post"
+                                        th:action="@{'/chauffeurs/' + ${ch.id} + '/supprimer'}"
+                                        th:if="${estAdmin}"
+                                    >
+                                        <button
+                                            class="btn btn-sm btn-outline-danger"
+                                            type="submit"
+                                        >
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${page.totalElements == 0}">
+                            <td colspan="9" class="text-center text-muted py-4">
+                                Aucun chauffeur pour ces critères.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav th:if="${page.totalPages > 1}">
+                <ul class="pagination pagination-sm justify-content-center">
+                    <li
+                        class="page-item"
+                        th:classappend="${page.first} ? 'disabled' : ''"
+                    >
+                        <a
+                            class="page-link"
+                            th:href="@{/chauffeurs(page=${page.number - 1}, recherche=${recherche}, statut=${statutSelectionne})}"
+                            >Précédent</a
+                        >
+                    </li>
+                    <li
+                        class="page-item"
+                        th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                        th:classappend="${i == page.number} ? 'active' : ''"
+                    >
+                        <a
+                            class="page-link"
+                            th:href="@{/chauffeurs(page=${i}, recherche=${recherche}, statut=${statutSelectionne})}"
+                            th:text="${i + 1}"
+                            >1</a
+                        >
+                    </li>
+                    <li
+                        class="page-item"
+                        th:classappend="${page.last} ? 'disabled' : ''"
+                    >
+                        <a
+                            class="page-link"
+                            th:href="@{/chauffeurs(page=${page.number + 1}, recherche=${recherche}, statut=${statutSelectionne})}"
+                            >Suivant</a
+                        >
+                    </li>
+                </ul>
+            </nav>
+        </main>
+
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+        <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+    </body>
+</html>

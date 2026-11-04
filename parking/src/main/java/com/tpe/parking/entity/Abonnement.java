@@ -41,13 +41,81 @@ public class Abonnement {
     public Abonnement() {
     }
 
+    public Abonnement(Long id, Utilisateur utilisateur, Vehicule vehicule, AbonnementType type, LocalDate dateDebut, LocalDate dateFin, AbonnementStatut statut) {
+        this.id = id;
+        this.utilisateur = utilisateur;
+        this.vehicule = vehicule;
+        this.type = type;
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+        this.statut = statut;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Utilisateur getUtilisateur() {
+        return utilisateur;
+    }
+
+    public void setUtilisateur(Utilisateur utilisateur) {
+        this.utilisateur = utilisateur;
+    }
+
+    public Vehicule getVehicule() {
+        return vehicule;
+    }
+
+    public void setVehicule(Vehicule vehicule) {
+        this.vehicule = vehicule;
+    }
+
+    public AbonnementType getType() {
+        return type;
+    }
+
+    public void setType(AbonnementType type) {
+        this.type = type;
+    }
+
+    public LocalDate getDateDebut() {
+        return dateDebut;
+    }
+
+    public void setDateDebut(LocalDate dateDebut) {
+        this.dateDebut = dateDebut;
+    }
+
+    public LocalDate getDateFin() {
+        return dateFin;
+    }
+
+    public void setDateFin(LocalDate dateFin) {
+        this.dateFin = dateFin;
+    }
+
+    public AbonnementStatut getStatut() {
+        return statut;
+    }
+
+    public void setStatut(AbonnementStatut statut) {
+        this.statut = statut;
+    }
+
     /**
-     * Détermine si l'abonnement est actuellement valide en fonction des dates.
+     * Détermine si l'abonnement est actuellement valide en fonction des dates et du statut.
      */
     public boolean estValide() {
         if (dateDebut == null || dateFin == null) return false;
         LocalDate now = LocalDate.now();
-        return (now.isEqual(dateDebut) || now.isAfter(dateDebut)) && (now.isEqual(dateFin) || now.isBefore(dateFin)) && this.statut == AbonnementStatut.ACTIF;
+        return (now.isEqual(dateDebut) || now.isAfter(dateDebut))
+                && (now.isEqual(dateFin) || now.isBefore(dateFin))
+                && this.statut == AbonnementStatut.ACTIF;
     }
 
     @Override

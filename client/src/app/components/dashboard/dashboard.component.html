@@ -1,0 +1,82 @@
+<div class="dashboard-container">
+  <div class="row">
+    <!-- Indicateurs clés -->
+    <div class="col-md-4">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h5 class="card-title">Places Totales</h5>
+          <h3>{{ places.length }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h5 class="card-title">Réservations Actives</h5>
+          <h3>{{ reservations.length }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h5 class="card-title">CA Journalier</h5>
+          <h3>{{ statsRevenus?.caJournalier || 0 }} €</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Occupation par zone -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <h4>Occupation par Zone</h4>
+      @for (zone of getZones(); track zone); {
+        <div class="col-md-4 mb-3">
+          <div class="zone-stat">
+            <span><strong>{{ zone.nom }}</strong> ({{ zone.placesTotal }})</span>
+            <div class="progress progress-sm">
+              <div class="progress-bar" [style.width]="zone.tauxOccupation + '%'" [ngClass]="{
+                'bg-success': zone.tauxOccupation < 50,
+                'bg-warning': zone.tauxOccupation >= 50 && zone.tauxOccupation < 80,
+                'bg-danger': zone.tauxOccupation >= 80
+              }"></div>
+            </div>
+            <span>{{ zone.tauxOccupation }}%</span>
+          </div>
+        </div>
+        }
+      @empty {
+        <span>Aucune zone disponible</span>
+      }
+      </div>
+    </div>
+  </div>
+
+  <!-- Dernières entrées/sorties -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <h4>Dernières Entrées/Sorties</h4>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Immatriculation</th>
+              <th>Heure</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entree of entreesSorties.slice(0, 5); track entree) {
+              <tr>
+                <td>{{ entree.immatriculation || 'N/A' }}</td>
+                <td>{{ entree.heure || 'N/A' }}</td>
+                <td>{{ entree.action || 'N/A' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

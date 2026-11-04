@@ -1,0 +1,64 @@
+/* Pastilles de statut (courses, chauffeurs, véhicules). */
+.pastille {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .18rem .5rem;
+    border-radius: 1rem;
+    color: #fff;
+}
+
+/* Cours */
+.pastille-EN_ATTENTE { background-color: #fd7e14; }
+.pastille-ASSIGNEE { background-color: #0d6efd; }
+.pastille-EN_COURS { background-color: #6f42c1; }
+.pastille-TERMINEE { background-color: #198754; }
+.pastille-ANNULEE { background-color: #6c757d; }
+
+/* Chauffeurs */
+.pastille-DISPONIBLE { background-color: #198754; }
+.pastille-EN_PAUSE { background-color: #fd7e14; }
+.pastille-INDISPONIBLE { background-color: #6c757d; }
+.pastille-SUSPENDU { background-color: #dc3545; }
+
+/* Véhicules */
+.pastille-MAINTENANCE { background-color: #fd7e14; }
+.pastille-HORS_SERVICE { background-color: #6c757d; }
+
+/* Cartes d'indicateurs. */
+.kpi-card .kpi-valeur {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+/* Barres de l'histogramme du chiffre d'affaires (sans JavaScript). */
+.barre-revenu {
+    background-color: #0d6efd;
+    border-radius: .25rem .25rem 0 0;
+    min-height: 2px;
+}
+
+/* Carte compacte de véhicule/chauffeur dans la vue synoptique de la flotte. */
+.carte-flotte {
+    border: 1px solid rgba(0, 0, 0, .125);
+    border-radius: .5rem;
+    padding: .6rem .75rem;
+    height: 100%;
+}
+
+.carte-flotte .titre {
+    font-weight: 700;
+    font-size: .95rem;
+}
+
+.carte-flotte .detail {
+    font-size: .78rem;
+    color: #6c757d;
+}
+
+.ligne-flotte {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .6rem;
+}

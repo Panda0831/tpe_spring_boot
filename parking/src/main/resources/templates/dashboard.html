@@ -1,0 +1,222 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+    <head th:replace="~{fragments/layout :: head('Tableau de bord')}"></head>
+    <body>
+        <nav th:replace="~{fragments/layout :: nav}"></nav>
+        <div th:replace="~{fragments/layout :: flash}"></div>
+
+        <main class="container">
+            <h1 class="h3 mb-4">Tableau de bord</h1>
+
+            <!-- Indicateurs clés -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="card kpi-card h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">
+                                Taux d'occupation
+                            </div>
+                            <div
+                                class="kpi-valeur text-primary"
+                                th:text="${#numbers.formatDecimal(occupation.tauxOccupationPourcentage, 1, 2)} + ' %'"
+                            >
+                                0 %
+                            </div>
+                            <div
+                                class="small text-muted"
+                                th:text="${occupation.placesOccupees + occupation.placesReservees} + ' / ' + ${occupation.totalPlaces} + ' places'"
+                            >
+                                0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card kpi-card h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">
+                                Chiffre d'affaires du jour
+                            </div>
+                            <div
+                                class="kpi-valeur text-success"
+                                th:text="${#numbers.formatDecimal(revenuJour.chiffreAffairesTotal, 1, 2)} + ' Ar'"
+                            >
+                                0 Ar
+                            </div>
+                            <div
+                                class="small text-muted"
+                                th:text="${revenuJour.nombreSortiesFacturees} + ' sortie(s) facturée(s)'"
+                            >
+                                0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card kpi-card h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">
+                                Véhicules présents
+                            </div>
+                            <div
+                                class="kpi-valeur text-danger"
+                                th:text="${nbPresents}"
+                            >
+                                0
+                            </div>
+                            <div class="small text-muted">
+                                <span th:text="${nbVehicules}">0</span>
+                                véhicules enregistrés
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card kpi-card h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Abonnements</div>
+                            <div
+                                class="kpi-valeur text-info"
+                                th:text="${nbAbonnements}"
+                            >
+                                0
+                            </div>
+                            <div class="small text-muted">
+                                <span th:text="${nbUtilisateurs}">0</span>
+                                utilisateurs
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <!-- Occupation par zone -->
+                <div class="col-lg-7">
+                    <div class="card h-100">
+                        <div class="card-header">Occupation par zone</div>
+                        <div class="card-body">
+                            <p
+                                th:if="${#lists.isEmpty(occupationZones)}"
+                                class="text-muted mb-0"
+                            >
+                                Aucune place configurée pour le moment.
+                            </p>
+                            <table
+                                class="table table-sm align-middle mb-0"
+                                th:unless="${#lists.isEmpty(occupationZones)}"
+                            >
+                                <thead>
+                                    <tr>
+                                        <th>Zone</th>
+                                        <th class="text-end">Libres</th>
+                                        <th class="text-end">Occupées</th>
+                                        <th class="text-end">Réservées</th>
+                                        <th class="text-end">Hors service</th>
+                                        <th style="width: 22%">Taux</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="z : ${occupationZones}">
+                                        <td
+                                            class="fw-semibold"
+                                            th:text="${z.zone}"
+                                        >
+                                            Zone
+                                        </td>
+                                        <td
+                                            class="text-end text-success"
+                                            th:text="${z.placesLibres}"
+                                        >
+                                            0
+                                        </td>
+                                        <td
+                                            class="text-end text-danger"
+                                            th:text="${z.placesOccupees}"
+                                        >
+                                            0
+                                        </td>
+                                        <td
+                                            class="text-end text-primary"
+                                            th:text="${z.placesReservees}"
+                                        >
+                                            0
+                                        </td>
+                                        <td
+                                            class="text-end text-secondary"
+                                            th:text="${z.placesHorsService}"
+                                        >
+                                            0
+                                        </td>
+                                        <td>
+                                            <div class="jauge">
+                                                <div
+                                                    th:style="'width: ' + ${z.tauxOccupationPourcentage} + '%'"
+                                                ></div>
+                                            </div>
+                                            <small
+                                                th:text="${#numbers.formatDecimal(z.tauxOccupationPourcentage, 1, 2)} + ' %'"
+                                                >0 %</small
+                                            >
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Raccourcis -->
+                <div class="col-lg-5">
+                    <div class="card h-100">
+                        <div class="card-header">Accès rapides</div>
+                        <div class="list-group list-group-flush">
+                            <a
+                                class="list-group-item list-group-item-action"
+                                th:href="@{/places}"
+                            >
+                                Plan du parking (places libres / occupées /
+                                réservées)
+                            </a>
+                            <a
+                                class="list-group-item list-group-item-action"
+                                th:href="@{/reservations}"
+                            >
+                                Réservations — créer, consulter, annuler
+                            </a>
+                            <a
+                                class="list-group-item list-group-item-action"
+                                th:href="@{/abonnements}"
+                            >
+                                Abonnements — souscrire, renouveler, résilier
+                            </a>
+                            <a
+                                class="list-group-item list-group-item-action"
+                                th:href="@{/borne}"
+                                th:if="${peutOperer}"
+                            >
+                                Borne entrées / sorties — facturation
+                                instantanée
+                            </a>
+                            <a
+                                class="list-group-item list-group-item-action"
+                                th:href="@{/statistiques}"
+                            >
+                                Statistiques d'occupation et de revenus
+                            </a>
+                        </div>
+                        <div class="card-footer small text-muted">
+                            Places configurées :
+                            <span th:text="${nbPlaces}">0</span> · passages
+                            enregistrés :
+                            <span th:text="${nbEntreesSorties}">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+        <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+    </body>
+</html>

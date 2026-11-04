@@ -1,0 +1,87 @@
+/* Plan de parking : grille de places avec code couleur (exigence du sujet). */
+.place-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: .6rem;
+}
+
+.place-card {
+    border-radius: .6rem;
+    padding: .55rem .4rem;
+    text-align: center;
+    color: #fff;
+    border: 2px solid rgba(0, 0, 0, .15);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+}
+
+.place-card .place-numero {
+    display: block;
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.1;
+}
+
+.place-card .place-details {
+    display: block;
+    font-size: .7rem;
+    opacity: .9;
+}
+
+.place-LIBRE { background-color: #198754; }
+.place-OCCUPEE { background-color: #dc3545; }
+.place-RESERVEE { background-color: #0d6efd; }
+.place-HORS_SERVICE { background-color: #6c757d; }
+
+/* Pastilles de statut réutilisées dans les tableaux. */
+.pastille {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .18rem .5rem;
+    border-radius: 1rem;
+    color: #fff;
+}
+
+.pastille-LIBRE { background-color: #198754; }
+.pastille-OCCUPEE { background-color: #dc3545; }
+.pastille-RESERVEE { background-color: #0d6efd; }
+.pastille-HORS_SERVICE { background-color: #6c757d; }
+.pastille-ACTIF { background-color: #198754; }
+.pastille-EXPIRE { background-color: #dc3545; }
+.pastille-ANNULE { background-color: #6c757d; }
+.pastille-EN_ATTENTE { background-color: #fd7e14; }
+.pastille-CONFIRMEE { background-color: #0d6efd; }
+.pastille-TERMINEE { background-color: #198754; }
+.pastille-ANNULEE { background-color: #6c757d; }
+
+/* Cartes d'indicateurs du tableau de bord. */
+.kpi-card .kpi-valeur {
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.legende-zone span {
+    margin-right: .75rem;
+    font-size: .85rem;
+}
+
+/* Jauge de taux d'occupation. */
+.jauge {
+    height: 1.1rem;
+    background-color: #e9ecef;
+    border-radius: .55rem;
+    overflow: hidden;
+}
+
+.jauge > div {
+    height: 100%;
+    background-color: #0d6efd;
+}
+
+/* Barres du graphique de revenus (sans dépendance JavaScript). */
+.barre-revenu {
+    background-color: #0d6efd;
+    border-radius: .25rem .25rem 0 0;
+    min-height: 2px;
+}

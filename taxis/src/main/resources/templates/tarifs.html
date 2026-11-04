@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Tarifs & Dispatch')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Tarifs & Moteur d'Attribution</h1>
+        <span class="badge text-bg-primary fs-6">Configuration Globale</span>
+    </div>
+
+    <div class="row g-4">
+        <!-- Présentation & Valeurs courantes -->
+        <div class="col-12 col-lg-5">
+            <div class="card mb-3">
+                <div class="card-header bg-dark text-white">Formule de Facturation</div>
+                <div class="card-body">
+                    <p class="mb-2">Le tarif de chaque course est calculé de manière automatique selon la règle :</p>
+                    <div class="p-3 bg-light rounded font-monospace small mb-3">
+                        Tarif = Tarif_Base + (Prix_Km &times; Distance_Km)<br>
+                        Commission = Tarif &times; (Commission_% / 100)<br>
+                        Part_Chauffeur = Tarif - Commission
+                    </div>
+                    <ul class="list-group list-group-flush small" th:if="${tarif != null}">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Tarif de base :</span>
+                            <strong th:text="${#numbers.formatDecimal(tarif.tarifBase, 1, 2)} + ' Ar'">2.50 Ar</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Prix par kilomètre :</span>
+                            <strong th:text="${#numbers.formatDecimal(tarif.prixKm, 1, 2)} + ' Ar/km'">1.80 Ar/km</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Commission société :</span>
+                            <strong class="text-primary" th:text="${#numbers.formatDecimal(tarif.commissionPourcentage, 1, 1)} + ' %'">20.0 %</strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-dark text-white">Algorithme d'Attribution Automatique</div>
+                <div class="card-body">
+                    <p class="mb-2">Le dispatcher affecte automatiquement les courses aux chauffeurs éligibles selon un score composite :</p>
+                    <div class="p-3 bg-light rounded font-monospace small mb-3">
+                        Score = (Poids_Proximité &times; Score_Proximité) + (Poids_Équité &times; Score_Équité)
+                    </div>
+                    <p class="small text-muted mb-0">
+                        &bull; <strong>Proximité :</strong> calculée par distance entre le point de départ et la dernière position connue du chauffeur.<br>
+                        &bull; <strong>Équité :</strong> favorise les chauffeurs ayant reçu le moins de courses sur les 30 derniers jours.<br>
+                        &bull; <strong>Départage :</strong> ancienneté d'embauche en cas d'égalité stricte.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire de modification (ADMIN) -->
+        <div class="col-12 col-lg-7">
+            <div class="card" th:if="${tarif != null}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Paramètres du Système</span>
+                    <span th:if="${estAdmin}" class="badge text-bg-warning">Mode Administrateur</span>
+                    <span th:unless="${estAdmin}" class="badge text-bg-secondary">Lecture Seule</span>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/tarifs}" method="post">
+                        <input type="hidden" name="id" th:value="${tarif.id}">
+
+                        <h6 class="border-bottom pb-2 mb-3 text-muted">Tarification des courses</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label" for="tarifBase">Tarif de base (Ar)</label>
+                                <input class="form-control" id="tarifBase" name="tarifBase" type="number"
+                                       step="0.01" min="0" th:value="${tarif.tarifBase}"
+                                       th:disabled="${!estAdmin}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="prixKm">Prix au km (Ar)</label>
+                                <input class="form-control" id="prixKm" name="prixKm" type="number"
+                                       step="0.01" min="0.01" th:value="${tarif.prixKm}"
+                                       th:disabled="${!estAdmin}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="commissionPourcentage">Commission (%)</label>
+                                <input class="form-control" id="commissionPourcentage" name="commissionPourcentage"
+                                       type="number" step="0.01" min="0" max="100"
+                                       th:value="${tarif.commissionPourcentage}"
+                                       th:disabled="${!estAdmin}" required>
+                            </div>
+                        </div>
+
+                        <h6 class="border-bottom pb-2 mb-3 text-muted">Coefficients d'attribution du dispatcher</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label" for="poidsProximite">Poids proximité</label>
+                                <input class="form-control" id="poidsProximite" name="poidsProximite"
+                                       type="number" step="any" min="0" max="1000"
+                                       th:value="${tarif.poidsProximite}"
+                                       th:disabled="${!estAdmin}">
+                                <div class="form-text">Défaut recommandé : <code>0.60</code></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="poidsEquite">Poids équité</label>
+                                <input class="form-control" id="poidsEquite" name="poidsEquite"
+                                       type="number" step="any" min="0" max="1000"
+                                       th:value="${tarif.poidsEquite}"
+                                       th:disabled="${!estAdmin}">
+                                <div class="form-text">Défaut recommandé : <code>0.40</code></div>
+                            </div>
+                        </div>
+
+                        <div th:if="${estAdmin}" class="text-end">
+                            <button class="btn btn-primary" type="submit">Enregistrer les modifications</button>
+                        </div>
+                        <div th:unless="${estAdmin}" class="alert alert-info py-2 small mb-0">
+                            Connectez-vous en tant qu'<strong>ADMIN</strong> (ex: <code>admin:password</code>) pour modifier ces valeurs.
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-warning" th:if="${tarif == null}">
+                Aucun paramètre tarifaire n'a été initialisé en base.
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

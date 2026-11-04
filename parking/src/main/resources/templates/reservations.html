@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Réservations')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Réservations</h1>
+        <span class="text-muted small" th:text="${page.totalElements} + ' réservation(s)'">0</span>
+    </div>
+
+    <!-- Filtre par statut -->
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/reservations}">
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="statut">Statut</label>
+            <select class="form-select" id="statut" name="statut">
+                <option value="">Tous les statuts</option>
+                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"
+                        th:selected="${s == statutSelectionne}">Statut</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Filtrer</button>
+            <a class="btn btn-outline-secondary" th:href="@{/reservations}">Réinitialiser</a>
+        </div>
+    </form>
+
+    <div class="card mb-4" th:if="${utilisateurPropre or not #lists.isEmpty(utilisateurs)}">
+        <div class="card-header">Nouvelle réservation</div>
+        <div class="card-body">
+            <form class="row g-3" method="post" th:action="@{/reservations}">
+                <div class="col-12 col-md-4" th:if="${utilisateurPropre}">
+                    <label class="form-label">Utilisateur</label>
+                    <input type="hidden" name="utilisateurId" th:value="${utilisateurIdConnecte}">
+                    <p class="form-control-plaintext">Mon compte</p>
+                </div>
+                <div class="col-12 col-md-4" th:unless="${utilisateurPropre}">
+                    <label class="form-label" for="utilisateurId">Utilisateur</label>
+                    <select class="form-select" id="utilisateurId" name="utilisateurId" required>
+                        <option value="" disabled selected>Choisir un utilisateur</option>
+                        <option th:each="u : ${utilisateurs}" th:value="${u.id}"
+                                th:text="${u.prenom + ' ' + u.nom + ' (' + u.email + ')'}">Utilisateur</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="vehiculeId">Véhicule</label>
+                    <select class="form-select" id="vehiculeId" name="vehiculeId" required>
+                        <option value="" selected th:if="${not utilisateurPropre}">Choisir d'abord un utilisateur</option>
+                        <option th:each="v : ${vehicules}" th:value="${v.id}"
+                                th:attr="data-utilisateur-id=${v.utilisateurId}"
+                                th:text="${v.immatriculation + ' — ' + v.marque + ' ' + v.modele}">Véhicule</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="placeId">Place souhaitée (optionnelle)</label>
+                    <select class="form-select" id="placeId" name="placeId">
+                        <option value="">Attribution automatique</option>
+                        <option th:each="p : ${placesLibres}" th:value="${p.id}"
+                                th:text="${p.zone + ' / ' + p.numero + ' (' + p.type + ')'}">Place</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="dateArriveePrevue">Arrivée prévue</label>
+                    <input class="form-control" type="datetime-local" id="dateArriveePrevue"
+                           name="dateArriveePrevue" required>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="dateDepartPrevue">Départ prévu</label>
+                    <input class="form-control" type="datetime-local" id="dateDepartPrevue"
+                           name="dateDepartPrevue" required>
+                </div>
+                <div class="col-12 col-md-4 d-flex align-items-end">
+                    <button class="btn btn-success w-100" type="submit">Réserver la place</button>
+                </div>
+            </form>
+            <p class="small text-muted mb-0 mt-2">
+                Le système refuse deux réservations qui se chevauchent sur la même place
+                (vérification transactionnelle de non-chevauchement).
+            </p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Utilisateur</th>
+                <th>Véhicule</th>
+                <th>Place</th>
+                <th>Arrivée prévue</th>
+                <th>Départ prévu</th>
+                <th>Statut</th>
+                <th class="text-end">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${page.content}">
+                <td th:text="${r.id}">1</td>
+                <td th:text="${r.nomUtilisateur}">Nom</td>
+                <td th:text="${r.immatriculationVehicule}">Plaque</td>
+                <td th:text="${r.numeroPlace != null ? r.numeroPlace : '—'}">Place</td>
+                <td th:text="${r.dateArriveePrevue != null ? #temporals.format(r.dateArriveePrevue, 'dd/MM/yyyy HH:mm') : '—'}">Date</td>
+                <td th:text="${r.dateDepartPrevue != null ? #temporals.format(r.dateDepartPrevue, 'dd/MM/yyyy HH:mm') : '—'}">Date</td>
+                <td><span class="pastille" th:classappend="${'pastille-' + r.statut}" th:text="${r.statut}">Statut</span></td>
+                <td class="text-end">
+                    <form method="post" th:action="@{'/reservations/' + ${r.id} + '/annuler'}"
+                          th:if="${peutOperer and r.statut.name() != 'ANNULEE' and r.statut.name() != 'TERMINEE'}">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Annuler</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${page.totalElements == 0}">
+                <td colspan="8" class="text-center text-muted py-4">Aucune réservation pour ces critères.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${page.totalPages > 1}">
+        <ul class="pagination pagination-sm justify-content-center">
+            <li class="page-item" th:classappend="${page.first} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/reservations(page=${page.number - 1}, statut=${statutSelectionne})}">
+                    Précédent
+                </a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                th:classappend="${i == page.number} ? 'active' : ''">
+                <a class="page-link" th:href="@{/reservations(page=${i}, statut=${statutSelectionne})}"
+                   th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${page.last} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/reservations(page=${page.number + 1}, statut=${statutSelectionne})}">
+                    Suivant
+                </a>
+            </li>
+        </ul>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+    const arrivalInput = document.getElementById('dateArriveePrevue');
+    const departureInput = document.getElementById('dateDepartPrevue');
+    if (arrivalInput && departureInput) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 1, 0, 0);
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        arrivalInput.min = now.toISOString().slice(0, 16);
+        const updateDepartureMinimum = () => {
+            departureInput.min = arrivalInput.value || arrivalInput.min;
+        };
+        arrivalInput.addEventListener('change', updateDepartureMinimum);
+        updateDepartureMinimum();
+    }
+
+    const utilisateurSelect = document.getElementById('utilisateurId');
+    const vehiculeSelect = document.getElementById('vehiculeId');
+    if (utilisateurSelect && vehiculeSelect) {
+        const vehiculesDisponibles = Array.from(vehiculeSelect.options)
+            .slice(1)
+            .map(option => option.cloneNode(true));
+        utilisateurSelect.addEventListener('change', () => {
+            const utilisateurId = utilisateurSelect.value;
+            const vehiculesUtilisateur = vehiculesDisponibles.filter(
+                option => option.dataset.utilisateurId === utilisateurId
+            );
+            vehiculeSelect.replaceChildren(new Option(
+                vehiculesUtilisateur.length > 0
+                    ? 'Choisir un véhicule'
+                    : 'Aucun véhicule enregistré pour cet utilisateur',
+                ''
+            ), ...vehiculesUtilisateur);
+            vehiculeSelect.disabled = vehiculesUtilisateur.length === 0;
+        });
+    }
+</script>
+</body>
+</html>

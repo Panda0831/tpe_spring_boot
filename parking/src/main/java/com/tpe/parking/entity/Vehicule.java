@@ -1,11 +1,10 @@
 package com.tpe.parking.entity;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -25,12 +24,11 @@ public class Vehicule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // immatriculation
-    private long immatriculation;
+    @Column(nullable = false, unique = true)
+    private String immatriculation;
 
     private String marque;
 
-    // modele
     private String modele;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,45 +46,85 @@ public class Vehicule {
     public Vehicule() {
     }
 
+    public Vehicule(Long id, String immatriculation, String marque, String modele, Utilisateur utilisateur) {
+        this.id = id;
+        this.immatriculation = immatriculation;
+        this.marque = marque;
+        this.modele = modele;
+        this.utilisateur = utilisateur;
+    }
+
     public Long getId() {
         return id;
     }
 
-    public long getImmatriculation() {
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getImmatriculation() {
         return immatriculation;
+    }
+
+    public void setImmatriculation(String immatriculation) {
+        this.immatriculation = immatriculation;
     }
 
     public String getMarque() {
         return marque;
     }
 
+    public void setMarque(String marque) {
+        this.marque = marque;
+    }
+
     public String getModele() {
         return modele;
+    }
+
+    public void setModele(String modele) {
+        this.modele = modele;
     }
 
     public Utilisateur getUtilisateur() {
         return utilisateur;
     }
 
+    public void setUtilisateur(Utilisateur utilisateur) {
+        this.utilisateur = utilisateur;
+    }
+
     public List<Reservation> getReservations() {
         return reservations;
+    }
+
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
     }
 
     public List<Abonnement> getAbonnements() {
         return abonnements;
     }
 
+    public void setAbonnements(List<Abonnement> abonnements) {
+        this.abonnements = abonnements;
+    }
+
     public List<EntreeSortie> getEntreesSorties() {
         return entreesSorties;
     }
 
+    public void setEntreesSorties(List<EntreeSortie> entreesSorties) {
+        this.entreesSorties = entreesSorties;
+    }
+
     @Override
     public String toString() {
-        return "{" +
-                " id='" + getId() + "'" +
-                ", immatriculation='" + getImmatriculation() + "'" +
-                ", marque='" + getMarque() + "'" +
-                ", modele='" + getModele() + "'" +
-                "}";
+        return "Vehicule{" +
+                "id=" + id +
+                ", immatriculation='" + immatriculation + '\'' +
+                ", marque='" + marque + '\'' +
+                ", modele='" + modele + '\'' +
+                '}';
     }
 }

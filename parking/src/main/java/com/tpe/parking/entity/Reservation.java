@@ -36,9 +36,75 @@ public class Reservation {
     private LocalDateTime dateDepartPrevue;
 
     @Enumerated(EnumType.STRING)
-    private ReservationStatus statut;
+    private ReservationStatus statut = ReservationStatus.EN_ATTENTE;
 
     public Reservation() {
+    }
+
+    public Reservation(Long id, Utilisateur utilisateur, Vehicule vehicule, Place place, LocalDateTime dateArriveePrevue, LocalDateTime dateDepartPrevue, ReservationStatus statut) {
+        this.id = id;
+        this.utilisateur = utilisateur;
+        this.vehicule = vehicule;
+        this.place = place;
+        this.dateArriveePrevue = dateArriveePrevue;
+        this.dateDepartPrevue = dateDepartPrevue;
+        this.statut = statut;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Utilisateur getUtilisateur() {
+        return utilisateur;
+    }
+
+    public void setUtilisateur(Utilisateur utilisateur) {
+        this.utilisateur = utilisateur;
+    }
+
+    public Vehicule getVehicule() {
+        return vehicule;
+    }
+
+    public void setVehicule(Vehicule vehicule) {
+        this.vehicule = vehicule;
+    }
+
+    public Place getPlace() {
+        return place;
+    }
+
+    public void setPlace(Place place) {
+        this.place = place;
+    }
+
+    public LocalDateTime getDateArriveePrevue() {
+        return dateArriveePrevue;
+    }
+
+    public void setDateArriveePrevue(LocalDateTime dateArriveePrevue) {
+        this.dateArriveePrevue = dateArriveePrevue;
+    }
+
+    public LocalDateTime getDateDepartPrevue() {
+        return dateDepartPrevue;
+    }
+
+    public void setDateDepartPrevue(LocalDateTime dateDepartPrevue) {
+        this.dateDepartPrevue = dateDepartPrevue;
+    }
+
+    public ReservationStatus getStatut() {
+        return statut;
+    }
+
+    public void setStatut(ReservationStatus statut) {
+        this.statut = statut;
     }
 
     @Override
@@ -47,7 +113,7 @@ public class Reservation {
                 "id=" + id +
                 ", utilisateur=" + (utilisateur != null ? utilisateur.getId() : null) +
                 ", vehicule=" + (vehicule != null ? vehicule.getId() : null) +
-                ", place=" + (place != null ? place.toString() : null) +
+                ", place=" + (place != null ? place.getId() : null) +
                 ", dateArriveePrevue=" + dateArriveePrevue +
                 ", dateDepartPrevue=" + dateDepartPrevue +
                 ", statut=" + statut +

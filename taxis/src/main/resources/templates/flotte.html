@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Disponibilité de la flotte')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <h1 class="h3 mb-1">Disponibilité de la flotte</h1>
+    <p class="text-muted">
+        <span th:text="${#lists.size(chauffeursEligibles)}">0</span> chauffeur(s) éligible(s) pour une course ·
+        <span th:text="${#lists.size(vehiculesDisponibles)}">0</span> véhicule(s) disponible(s).
+        Les chauffeurs dont le permis expire avant le
+        <span th:text="${#temporals.format(dateAlertePermis, 'dd/MM/yyyy')}">—</span> sont signalés.
+    </p>
+
+    <!-- Chauffeurs par statut -->
+    <h2 class="h5 mt-4">Chauffeurs</h2>
+    <div th:each="entree : ${chauffeursParStatut}" class="mb-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="pastille" th:classappend="${'pastille-' + entree.key}" th:text="${entree.key}">STATUT</span>
+            <span class="text-muted small" th:text="${#lists.size(entree.value)} + ' chauffeur(s)'">0</span>
+        </div>
+        <p th:if="${#lists.isEmpty(entree.value)}" class="text-muted small mb-0">Aucun chauffeur dans ce statut.</p>
+        <div class="ligne-flotte" th:unless="${#lists.isEmpty(entree.value)}">
+            <div class="carte-flotte" th:each="ch : ${entree.value}">
+                <div class="titre">
+                    <span th:text="${ch.nomComplet}">Nom</span>
+                    <i class="bi bi-exclamation-triangle-fill text-danger" th:if="${!ch.permisValide}"
+                       title="Permis expiré" aria-label="Permis expiré"></i>
+                    <i class="bi bi-clock-history text-warning"
+                          th:if="${ch.permisValide and ch.dateExpirationPermis != null and ch.dateExpirationPermis.isBefore(dateAlertePermis)}"
+                          title="Permis proche de l'expiration" aria-label="Permis proche de l'expiration"></i>
+                </div>
+                <div class="detail" th:text="${'Permis ' + ch.numeroPermis + ' · exp. ' + (ch.dateExpirationPermis != null ? #temporals.format(ch.dateExpirationPermis, 'dd/MM/yyyy') : '—')}">Permis</div>
+                <div class="detail" th:text="${'Véhicule : ' + (ch.vehiculeImmatriculation != null ? ch.vehiculeImmatriculation : 'aucun')}">Véhicule</div>
+                <div class="detail">
+                    <span class="text-success" th:if="${ch.eligiblePourCourse}">Éligible pour une course</span>
+                    <span class="text-danger" th:unless="${ch.eligiblePourCourse}">Non éligible (permis ou statut)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Véhicules par statut -->
+    <h2 class="h5 mt-4">Véhicules</h2>
+    <div th:each="entree : ${vehiculesParStatut}" class="mb-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="pastille" th:classappend="${'pastille-' + entree.key}" th:text="${entree.key}">STATUT</span>
+            <span class="text-muted small" th:text="${#lists.size(entree.value)} + ' véhicule(s)'">0</span>
+        </div>
+        <p th:if="${#lists.isEmpty(entree.value)}" class="text-muted small mb-0">Aucun véhicule dans ce statut.</p>
+        <div class="ligne-flotte" th:unless="${#lists.isEmpty(entree.value)}">
+            <div class="carte-flotte" th:each="v : ${entree.value}">
+                <div class="titre" th:text="${v.immatriculation}">Immatriculation</div>
+                <div class="detail" th:text="${v.marque + ' ' + v.modele + ' (' + v.annee + ')'}">Modèle</div>
+                <div class="detail" th:text="${v.capacite + ' places · ' + #numbers.formatDecimal(v.kilometrage, 1, 0) + ' km'}">Km</div>
+                <div class="detail" th:text="${'Chauffeur : ' + (v.nomChauffeur != null ? v.nomChauffeur : 'aucun')}">Chauffeur</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

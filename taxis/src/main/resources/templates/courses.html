@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Courses')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Courses</h1>
+        <span class="text-muted small" th:text="${page.totalElements} + ' course(s)'">0</span>
+    </div>
+
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/courses}">
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="statut">Statut</label>
+            <select class="form-select" id="statut" name="statut">
+                <option value="">Tous les statuts</option>
+                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"
+                        th:selected="${s == statutSelectionne}">Statut</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Filtrer</button>
+            <a class="btn btn-outline-secondary" th:href="@{/courses}">Réinitialiser</a>
+        </div>
+    </form>
+
+    <!-- Commande d'une course -->
+    <div class="card mb-4" th:if="${not #lists.isEmpty(clients)}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Commander une course</span>
+            <a class="btn btn-sm btn-outline-primary" th:href="@{/clients}">+ Gérer les clients</a>
+        </div>
+        <div class="card-body">
+            <form class="row g-3" method="post" th:action="@{/courses}">
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="clientId">Client</label>
+                    <select class="form-select" id="clientId" name="clientId" required>
+                        <option th:each="c : ${clients}" th:value="${c.id}"
+                                th:text="${c.nomComplet + ' — ' + c.telephone}">Client</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="pointDepart">Point de départ</label>
+                    <input class="form-control" id="pointDepart" name="pointDepart" maxlength="255" required
+                           placeholder="Gombe, Avenue Kasa-Vubu">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="destination">Destination</label>
+                    <input class="form-control" id="destination" name="destination" maxlength="255" required
+                           placeholder="Aéroport de N'djili">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label" for="distanceKm">Distance estimée (km)</label>
+                    <input class="form-control" id="distanceKm" name="distanceKm" type="number"
+                           step="any" min="0" required>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label" for="dateHeure">Date et heure (optionnel)</label>
+                    <input class="form-control" id="dateHeure" name="dateHeure" type="datetime-local">
+                </div>
+                <div class="col-12 col-md-3 d-flex align-items-end">
+                    <button class="btn btn-success w-100" type="submit">Créer la course</button>
+                </div>
+            </form>
+            <p class="small text-muted mb-0 mt-2">
+                La course est créée en <code>EN_ATTENTE</code> avec un tarif calculé
+                (tarif de base + prix du km). Elle est ensuite attribuée par le dispatch automatique.
+            </p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Client</th>
+                <th>Trajet</th>
+                <th>Date</th>
+                <th class="text-end">Km</th>
+                <th class="text-end">Tarif</th>
+                <th>Chauffeur / véhicule</th>
+                <th>Statut</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${page.content}">
+                <td th:text="${c.id}">1</td>
+                <td>
+                    <span th:text="${c.nomClient}">Client</span><br>
+                    <small class="text-muted" th:text="${c.telephoneClient}">Téléphone</small>
+                </td>
+                <td>
+                    <span th:text="${c.pointDepart}">Départ</span> →
+                    <span th:text="${c.destination}">Arrivée</span>
+                </td>
+                <td th:text="${c.dateHeure != null ? #temporals.format(c.dateHeure, 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(c.distanceKm, 1, 1)}">0</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(c.tarif, 1, 2)} + ' Ar'">0 Ar</td>
+                <td>
+                    <span th:text="${c.nomChauffeur != null ? c.nomChauffeur : '—'}">—</span><br>
+                    <small class="text-muted"
+                           th:text="${c.immatriculationVehicule != null ? c.immatriculationVehicule : ''}"></small>
+                </td>
+                <td><span class="pastille" th:classappend="${'pastille-' + c.statut}" th:text="${c.statut}">Statut</span></td>
+                <td class="text-end">
+                    <div class="d-flex flex-column gap-1 align-items-end" th:if="${peutOperer}">
+                        <!-- Attribution : dispatch automatique (1 clic) ou manuelle -->
+                        <form method="post" th:action="@{'/courses/' + ${c.id} + '/dispatcher'}"
+                              th:if="${c.statut.name() == 'EN_ATTENTE'}">
+                            <button class="btn btn-sm btn-primary" type="submit">Attribution auto</button>
+                        </form>
+                        <form class="d-flex gap-1" method="post" th:action="@{'/courses/' + ${c.id} + '/assigner'}"
+                              th:if="${c.statut.name() == 'EN_ATTENTE'}">
+                            <select class="form-select form-select-sm" name="chauffeurId" style="width: 12rem" required>
+                                <option value="">Choisir un chauffeur</option>
+                                <option th:each="ch : ${chauffeursEligibles}" th:value="${ch.id}"
+                                        th:text="${ch.nomComplet + ' — ' + ch.numeroPermis}">Chauffeur</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-primary" type="submit">Assigner</button>
+                        </form>
+                        <form method="post" th:action="@{'/courses/' + ${c.id} + '/demarrer'}"
+                              th:if="${c.statut.name() == 'ASSIGNEE'}">
+                            <button class="btn btn-sm btn-primary" type="submit">Démarrer</button>
+                        </form>
+                        <form method="post" th:action="@{'/courses/' + ${c.id} + '/terminer'}"
+                              th:if="${c.statut.name() == 'EN_COURS'}">
+                            <button class="btn btn-sm btn-success" type="submit">Terminer</button>
+                        </form>
+                        <form method="post" th:action="@{'/courses/' + ${c.id} + '/annuler'}"
+                              th:if="${peutGerer and (c.statut.name() == 'EN_ATTENTE' or c.statut.name() == 'ASSIGNEE')}">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">Annuler</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${page.totalElements == 0}">
+                <td colspan="9" class="text-center text-muted py-4">Aucune course pour ces critères.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <nav th:if="${page.totalPages > 1}">
+        <ul class="pagination pagination-sm justify-content-center">
+            <li class="page-item" th:classappend="${page.first} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/courses(page=${page.number - 1}, statut=${statutSelectionne})}">Précédent</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                th:classappend="${i == page.number} ? 'active' : ''">
+                <a class="page-link" th:href="@{/courses(page=${i}, statut=${statutSelectionne})}" th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${page.last} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/courses(page=${page.number + 1}, statut=${statutSelectionne})}">Suivant</a>
+            </li>
+        </ul>
+    </nav>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

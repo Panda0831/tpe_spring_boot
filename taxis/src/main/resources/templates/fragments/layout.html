@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:fragment="head(titre)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <title th:text="${titre} + ' — Gestion de flotte de taxis'">Gestion de flotte de taxis</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<!-- Barre de navigation : les entrées sont filtrées selon la hiérarchie des rôles. -->
+<nav th:fragment="nav" class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/dashboard}"><i class="bi bi-car-front-fill me-2" aria-hidden="true"></i>Taxis TPE</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPrincipale">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navPrincipale">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-speedometer2 me-1" aria-hidden="true"></i>Tableau de bord</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/courses}"><i class="bi bi-list-check me-1" aria-hidden="true"></i>Courses</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/flotte}"><i class="bi bi-grid-3x3-gap me-1" aria-hidden="true"></i>Disponibilité</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/chauffeurs}"><i class="bi bi-person-badge me-1" aria-hidden="true"></i>Chauffeurs</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/vehicules}"><i class="bi bi-car-front me-1" aria-hidden="true"></i>Véhicules</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/clients}"><i class="bi bi-people me-1" aria-hidden="true"></i>Clients</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/statistiques}"><i class="bi bi-bar-chart-line me-1" aria-hidden="true"></i>Statistiques</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/tarifs}"><i class="bi bi-cash-coin me-1" aria-hidden="true"></i>Tarifs</a></li>
+            </ul>
+            <span class="navbar-text text-light me-3" th:if="${utilisateurConnecte != null}">
+                <span th:text="${utilisateurConnecte}">utilisateur</span>
+                <span class="badge text-bg-secondary ms-1" th:text="${roleConnecte}">ROLE</span>
+            </span>
+            <form th:action="@{/logout}" method="post" class="d-flex">
+                <button class="btn btn-outline-light btn-sm" type="submit"><i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>Déconnexion</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- Messages flash : succès et erreurs métier remontées par les services. -->
+<div th:fragment="flash" class="container">
+    <div th:if="${succes}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${succes}">Succès</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${erreur}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${erreur}">Erreur</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+
+<footer th:fragment="footer" class="container text-center text-muted py-4 mt-5 border-top">
+    <small>Projet TPE — Application de gestion de flotte de taxis · Spring Boot / JPA / Thymeleaf / Spring Security</small>
+</footer>
+
+<th:block th:fragment="scripts">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</th:block>
+
+</body>
+</html>

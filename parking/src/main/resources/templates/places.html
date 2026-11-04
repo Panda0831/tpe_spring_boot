@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Plan du parking')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Plan du parking</h1>
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                data-bs-target="#formulaireNouvellePlace" th:if="${estAdmin}">
+            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Ajouter une place
+        </button>
+    </div>
+
+    <div class="collapse mb-4" id="formulaireNouvellePlace" th:if="${estAdmin}">
+        <div class="card">
+            <div class="card-header">Nouvelle place</div>
+            <div class="card-body">
+                <form class="row g-3 align-items-end" method="post" th:action="@{/places}">
+                    <div class="col-sm-4">
+                        <label class="form-label" for="numeroPlace">Numéro *</label>
+                        <input class="form-control" id="numeroPlace" name="numero" maxlength="20"
+                               pattern="[A-Za-z0-9-]+" title="Utilisez des lettres, chiffres ou tirets."
+                               placeholder="C1" required>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label" for="zonePlace">Zone *</label>
+                        <input class="form-control" id="zonePlace" name="zone" maxlength="50"
+                               placeholder="RDC" required>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label" for="typePlace">Type *</label>
+                        <select class="form-select" id="typePlace" name="type" required>
+                            <option value="STANDARD">STANDARD</option>
+                            <option value="PMR">PMR</option>
+                            <option value="VIP">VIP</option>
+                            <option value="ABONNE">ABONNE</option>
+                        </select>
+                    </div>
+                    <div class="col-12 text-end">
+                        <button class="btn btn-success" type="submit">Créer la place</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Légende du code couleur -->
+    <div class="card mb-3">
+        <div class="card-body py-2 legende-zone">
+            <span><span class="pastille pastille-LIBRE">LIBRE</span></span>
+            <span><span class="pastille pastille-OCCUPEE">OCCUPÉE</span></span>
+            <span><span class="pastille pastille-RESERVEE">RÉSERVÉE</span></span>
+            <span><span class="pastille pastille-HORS_SERVICE">HORS SERVICE</span></span>
+            <span class="text-muted">Types : <strong>PMR</strong> (priorité ayants droit), <strong>VIP</strong>, <strong>ABONNE</strong>, <strong>STANDARD</strong></span>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/places}">
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="zone">Zone</label>
+            <select class="form-select" id="zone" name="zone">
+                <option value="">Toutes les zones</option>
+                <option th:each="z : ${zones}" th:value="${z}" th:text="${z}"
+                        th:selected="${z == zoneSelectionnee}">Zone</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="type">Type</label>
+            <select class="form-select" id="type" name="type">
+                <option value="">Tous les types</option>
+                <option th:each="t : ${types}" th:value="${t}" th:text="${t}"
+                        th:selected="${t == typeSelectionne}">Type</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label mb-1" for="statut">Statut</label>
+            <select class="form-select" id="statut" name="statut">
+                <option value="">Tous les statuts</option>
+                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}"
+                        th:selected="${s == statutSelectionne}">Statut</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Filtrer</button>
+            <a class="btn btn-outline-secondary" th:href="@{/places}">Réinitialiser</a>
+        </div>
+    </form>
+
+    <p class="text-muted">
+        <span th:text="${#lists.size(places)}">0</span> place(s) affichée(s).
+        Répartition :
+        <span class="pastille pastille-LIBRE" th:text="${occupationLibres}">0</span>
+        libres,
+        <span class="pastille pastille-OCCUPEE" th:text="${occupationOccupees}">0</span>
+        occupées,
+        <span class="pastille pastille-RESERVEE" th:text="${occupationReservees}">0</span>
+        réservées.
+    </p>
+
+    <p th:if="${#lists.isEmpty(places)}" class="alert alert-info">
+        Aucune place ne correspond aux filtres sélectionnés.
+    </p>
+
+    <!-- Grille visuelle, groupée par zone -->
+    <div th:each="entree : ${placesParZone}" class="mb-4">
+        <h2 class="h5 border-bottom pb-1" th:text="'Zone ' + ${entree.key}">Zone</h2>
+        <div class="place-grid">
+            <div th:each="place : ${entree.value}"
+                 class="place-card"
+                 th:classappend="${'place-' + place.statut}"
+                 th:title="${'Place ' + place.numero + ' — ' + place.type + ' — ' + place.statut}">
+                <span class="place-numero" th:text="${place.numero}">A1</span>
+                <span class="place-details" th:text="${place.type}">STANDARD</span>
+                <span class="place-details" th:text="${place.statut}">LIBRE</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head th:replace="~{fragments/layout :: head('Tarifs')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+<div th:replace="~{fragments/layout :: flash}"></div>
+
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Grille Tarifaire du Parking</h1>
+        <span class="badge text-bg-primary fs-6">Tarification & Dépassements</span>
+    </div>
+
+    <!-- Explication du calcul de dépassement -->
+    <div class="card mb-4 border-info">
+        <div class="card-header bg-info-subtle fw-semibold">
+            <i class="bi bi-info-circle-fill me-2" aria-hidden="true"></i>Règle de facturation et gestion des dépassements
+        </div>
+        <div class="card-body">
+            <p class="mb-2">
+                Le calcul du stationnement suit rigoureusement les règles définies par zone :
+            </p>
+            <div class="p-3 bg-light rounded font-monospace small mb-2">
+                Durée stationnement = Heure Sortie - Heure Entrée (arrondie à l'heure supérieure)<br>
+                Si sortie &le; date de départ prévue : Montant = max(Tarif_Minimum, Durée &times; Montant_Heure &times; (1 - Réduction_Abonné))<br>
+                Si dépassement : Montant = (Durée_Prévue &times; Montant_Heure) + (Heures_Excédentaires &times; (Montant_Heure + Majoration))
+            </div>
+            <p class="small text-muted mb-0">
+                Exemple vérifié : 3h prévues à 2.00 Ar/h, départ avec 2h de retard et majoration de 1.00 Ar &rarr;
+                (3 &times; 2.00 Ar) + (2 &times; 3.00 Ar) = <strong>12.00 Ar</strong>.
+            </p>
+        </div>
+    </div>
+
+    <!-- Formulaire d'ajout d'un tarif (ADMIN) -->
+    <div class="card mb-4" th:if="${estAdmin}">
+        <div class="card-header bg-dark text-white">Ajouter / Configurer un tarif par zone</div>
+        <div class="card-body">
+            <form class="row g-3" method="post" th:action="@{/tarifs}">
+                <div class="col-12 col-md-2">
+                    <label class="form-label" for="zone">Zone *</label>
+                    <input class="form-control" id="zone" name="zone" maxlength="50" required placeholder="A, B ou GLOBAL">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="montantParHeure">Montant / heure (Ar) *</label>
+                    <input class="form-control" id="montantParHeure" name="montantParHeure" type="number"
+                           step="0.01" min="0.01" required placeholder="2.00">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="tarifMinimum">Tarif minimum (Ar)</label>
+                    <input class="form-control" id="tarifMinimum" name="tarifMinimum" type="number"
+                           step="0.01" min="0" placeholder="1.00">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="forfaitJournalier">Forfait jour (Ar)</label>
+                    <input class="form-control" id="forfaitJournalier" name="forfaitJournalier" type="number"
+                           step="0.01" min="0" placeholder="20.00">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="reductionAbonne">Réduction abonné</label>
+                    <input class="form-control" id="reductionAbonne" name="reductionAbonne" type="number"
+                           step="0.01" min="0" max="1" placeholder="0.20 (= 20%)">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label" for="majorationApres">Majoration dépassement (Ar)</label>
+                    <input class="form-control" id="majorationApres" name="majorationApres" type="number"
+                           step="0.01" min="0" placeholder="1.00">
+                </div>
+                <div class="col-12 text-end">
+                    <button class="btn btn-success" type="submit">Enregistrer la grille</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Grille des tarifs existants -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Zone</th>
+                <th class="text-end">Montant / h</th>
+                <th class="text-end">Tarif minimum</th>
+                <th class="text-end">Forfait jour</th>
+                <th class="text-end">Réduction abonné</th>
+                <th class="text-end">Majoration retard</th>
+                <th class="text-end" th:if="${estAdmin}">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="t : ${tarifs}">
+                <td th:text="${t.id}">1</td>
+                <td>
+                    <span class="badge text-bg-primary" th:text="${t.zone}">GLOBAL</span>
+                </td>
+                <td class="text-end fw-semibold" th:text="${#numbers.formatDecimal(t.montantParHeure, 1, 2)} + ' Ar'">2.00 Ar</td>
+                <td class="text-end text-muted" th:text="${t.tarifMinimum != null ? #numbers.formatDecimal(t.tarifMinimum, 1, 2) + ' Ar' : '0.00 Ar'}">1.00 Ar</td>
+                <td class="text-end text-muted" th:text="${t.forfaitJournalier != null ? #numbers.formatDecimal(t.forfaitJournalier, 1, 2) + ' Ar' : '—'}">20.00 Ar</td>
+                <td class="text-end text-success" th:text="${t.reductionAbonne != null ? #numbers.formatDecimal(t.reductionAbonne.multiply(100), 1, 0) + ' %' : '0 %'}">20 %</td>
+                <td class="text-end text-danger" th:text="${t.majorationApres != null ? '+ ' + #numbers.formatDecimal(t.majorationApres, 1, 2) + ' Ar/h' : '0.00 Ar'}">+ 1.00 Ar/h</td>
+                <td class="text-end" th:if="${estAdmin}">
+                    <form th:action="@{/tarifs/{id}/supprimer(id=${t.id})}" method="post"
+                          onsubmit="return confirm('Supprimer ce tarif ?');">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(tarifs)}">
+                <td colspan="8" class="text-center text-muted py-4">Aucun tarif configuré.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
