@@ -1,1 +1,220 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  color-scheme: light;
+  --taxi-ink: #17212b;
+  --taxi-muted: #718096;
+  --taxi-primary: #176b58;
+  --taxi-primary-dark: #105341;
+  --taxi-accent: #d7f36a;
+  --taxi-border: #e6ebea;
+  --taxi-surface: #ffffff;
+  --taxi-canvas: #f4f7f6;
+  --taxi-shadow: 0 12px 32px rgb(22 46 39 / 6%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  color: var(--taxi-ink);
+  background:
+    radial-gradient(ellipse at 92% 0%, rgb(215 243 106 / 12%), transparent 30rem),
+    var(--taxi-canvas);
+  font-family: 'Aptos', 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.navbar-brand {
+  color: var(--taxi-ink);
+  font-family: 'Aptos Display', 'Segoe UI', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+h2 {
+  margin-bottom: 0.35rem;
+  font-size: clamp(1.55rem, 3vw, 2rem);
+}
+
+.text-muted {
+  color: var(--taxi-muted) !important;
+}
+
+a {
+  color: var(--taxi-primary);
+}
+
+a:hover {
+  color: var(--taxi-primary-dark);
+}
+
+.container,
+.container-fluid {
+  width: min(100% - 2rem, 1440px);
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.container {
+  margin-top: 2rem !important;
+  margin-bottom: 3rem;
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid var(--taxi-border);
+  border-radius: 16px;
+  background: var(--taxi-surface);
+  box-shadow: var(--taxi-shadow);
+}
+
+.card-header {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--taxi-border);
+  background: transparent;
+  color: var(--taxi-ink);
+  font-family: 'Aptos Display', 'Segoe UI', sans-serif;
+  font-weight: 700;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.card-title {
+  font-family: 'Aptos Display', 'Segoe UI', sans-serif;
+  font-weight: 700;
+}
+
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--taxi-ink);
+  margin-bottom: 0;
+  vertical-align: middle;
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.85rem 1rem;
+  border-bottom-color: var(--taxi-border);
+}
+
+.table thead th {
+  color: var(--taxi-muted);
+  background: #f8faf9;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover > * {
+  background: #f8fbf8;
+}
+
+.form-label {
+  margin-bottom: 0.45rem;
+  color: #43515a;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.form-control,
+.form-select {
+  min-height: 44px;
+  border-color: #dce4e1;
+  border-radius: 10px;
+  color: var(--taxi-ink);
+  background-color: #fff;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--taxi-primary);
+  box-shadow: 0 0 0 0.2rem rgb(23 107 88 / 13%);
+}
+
+.btn {
+  min-height: 40px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  border-color: var(--taxi-primary);
+  background-color: var(--taxi-primary);
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-primary:focus-visible {
+  border-color: var(--taxi-primary-dark);
+  background-color: var(--taxi-primary-dark);
+}
+
+.btn-success {
+  border-color: #238263;
+  background-color: #238263;
+}
+
+.alert {
+  border: 0;
+  border-radius: 12px;
+}
+
+.badge {
+  padding: 0.45em 0.7em;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+:focus-visible {
+  outline: 3px solid rgb(23 107 88 / 38%);
+  outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+  .container,
+  .container-fluid {
+    width: min(100% - 1.25rem, 1440px);
+  }
+
+  .container {
+    margin-top: 1.25rem !important;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .table > :not(caption) > * > * {
+    padding: 0.7rem 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

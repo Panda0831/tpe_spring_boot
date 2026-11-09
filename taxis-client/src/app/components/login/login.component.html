@@ -1,0 +1,24 @@
+<div class="row justify-content-center mt-5">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title mb-3">Connexion</h4>
+        <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+        <form (ngSubmit)="submit()">
+          <div class="mb-3">
+            <label class="form-label">Utilisateur</label>
+            <input class="form-control" [(ngModel)]="username" name="username" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mot de passe</label>
+            <input class="form-control" type="password" [(ngModel)]="password" name="password" required />
+          </div>
+          <button class="btn btn-primary w-100" type="submit" [disabled]="loading">
+            {{ loading ? 'Connexion...' : 'Se connecter' }}
+          </button>
+        </form>
+        <p class="text-muted small mt-3 mb-0">Comptes démo : admin/password, manager/password, operator/password, user/password</p>
+      </div>
+    </div>
+  </div>
+</div>

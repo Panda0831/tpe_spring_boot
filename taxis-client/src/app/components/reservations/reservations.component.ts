@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ParkingService } from '../../services/parking.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -6,7 +8,7 @@ import { AuthService } from '../../services/auth.service';
   selector: 'tpe-reservations',
   templateUrl: './reservations.component.html',
   standalone: true,
-  imports: []
+  imports: [CommonModule, FormsModule]
 })
 export class ReservationsComponent implements OnInit {
   reservations: any[] = [];
@@ -15,7 +17,7 @@ export class ReservationsComponent implements OnInit {
 
   constructor(
     private parkingService: ParkingService,
-    private authService: AuthService
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {

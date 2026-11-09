@@ -7,7 +7,7 @@
           <select class="form-control" [(ngModel)]="filtrerPar">
             <option value="tous">Toutes les reservations</option>
             @for (statut of statutOptions; track statut) { 
-              <option [value]="statut">{{ statut }}</option }
+              <option [value]="statut">{{ statut }}</option>
             }
           </select>
         </div>

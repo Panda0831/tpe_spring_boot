@@ -135,7 +135,7 @@ def main():
     chauffeur_id = created_chauffeur.get("id") if isinstance(created_chauffeur, dict) else 1
 
     test("Lister Chauffeurs (paginé)", "GET", "/api/chauffeurs", params={"page": 0, "size": 10}, expected_status=200)
-    test("Lister Chauffeurs Éligibles", "GET", "/api/chauffeurs/eligible", expected_status=200)
+    test("Lister Chauffeurs Éligibles", "GET", "/api/chauffeurs/eligibles", expected_status=200)
     test("Consulter Chauffeur par ID", "GET", f"/api/chauffeurs/{chauffeur_id}", expected_status=200)
     test("Changer statut Chauffeur", "PATCH", f"/api/chauffeurs/{chauffeur_id}/statut",
          params={"statut": "EN_PAUSE"}, expected_status=200, auth=MANAGER)
@@ -169,7 +169,7 @@ def main():
     test("Consulter Course par ID", "GET", f"/api/courses/{course_id}", expected_status=200)
 
     # Dispatch automatique
-    test("Dispatch automatique de la Course (OPERATOR)", "POST", f"/api/dispatch/{course_id}",
+    test("Dispatch automatique de la Course (OPERATOR)", "POST", f"/api/dispatch/courses/{course_id}/dispatcher",
          expected_status=200, auth=OPERATOR)
 
     # Cycle de vie de la Course
@@ -177,12 +177,14 @@ def main():
          expected_status=200, auth=OPERATOR)
     test("Terminer la Course (OPERATOR)", "POST", f"/api/courses/{course_id}/terminer",
          expected_status=200, auth=OPERATOR)
+    test("Supprimer la Course terminée (ADMIN)", "DELETE", f"/api/courses/{course_id}",
+         expected_status=204, auth=ADMIN)
 
     # 9. Créer et Assigner en 1 appel (Dispatcher)
-    dispatch_direct = test("Créer et Assigner Course via Dispatch", "POST", "/api/dispatch/creer-et-assigner",
+    dispatch_direct = test("Créer et Assigner Course via Dispatch", "POST", "/api/dispatch/courses",
                            body={"clientId": client_id, "pointDepart": "Aéroport",
                                  "destination": "Hôtel Memling", "distanceKm": 18.0},
-                           expected_status=200, auth=OPERATOR)
+                           expected_status=201, auth=OPERATOR)
     course_direct_id = dispatch_direct.get("id") if isinstance(dispatch_direct, dict) else None
 
     if course_direct_id:
@@ -197,6 +199,8 @@ def main():
     test("Supprimer Chauffeur (ADMIN)", "DELETE", f"/api/chauffeurs/{chauffeur_id}",
          expected_status=204, auth=ADMIN)
     test("Supprimer Véhicule (ADMIN)", "DELETE", f"/api/vehicules/{vehicule_id}",
+         expected_status=204, auth=ADMIN)
+    test("Supprimer Client (ADMIN)", "DELETE", f"/api/clients/{client_id}",
          expected_status=204, auth=ADMIN)
 
     # Bilan

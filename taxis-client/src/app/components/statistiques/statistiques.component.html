@@ -1,0 +1,58 @@
+<h2>Statistiques</h2>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="row g-2 align-items-end">
+      <div class="col-auto">
+        <label class="form-label">Date début</label>
+        <input type="date" class="form-control" [(ngModel)]="dateDebut" />
+      </div>
+      <div class="col-auto">
+        <label class="form-label">Date fin</label>
+        <input type="date" class="form-control" [(ngModel)]="dateFin" />
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-primary" (click)="load()" [disabled]="loading">
+          {{ loading ? 'Chargement...' : 'Actualiser' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="row" *ngIf="!loading || revenue || activity">
+  <div class="col-md-6 mb-3">
+    <div class="card h-100">
+      <div class="card-header">Chiffre d'affaires</div>
+      <div class="card-body">
+        <div *ngIf="!revenue" class="text-muted">Aucune donnée.</div>
+        <table *ngIf="revenue" class="table table-sm mb-0">
+          <tbody>
+            <tr *ngFor="let k of keys(revenue)">
+              <th style="width: 45%">{{ k }}</th>
+              <td>{{ format(revenue[k]) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 mb-3">
+    <div class="card h-100">
+      <div class="card-header">Activité</div>
+      <div class="card-body">
+        <div *ngIf="!activity" class="text-muted">Aucune donnée.</div>
+        <table *ngIf="activity" class="table table-sm mb-0">
+          <tbody>
+            <tr *ngFor="let k of keys(activity)">
+              <th style="width: 45%">{{ k }}</th>
+              <td>{{ format(activity[k]) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,2 +1,75 @@
 <h2>Gestion des chauffeurs</h2>
-<p>Module chauffeurs - Projet Taxis</p>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+<div class="card mb-3">
+  <div class="card-header">{{ editingId ? 'Modifier le chauffeur' : 'Nouveau chauffeur' }}</div>
+  <div class="card-body">
+    <form (ngSubmit)="save()" class="row g-2">
+      <div class="col-md-2"><input class="form-control" placeholder="Nom" [(ngModel)]="form.nom" name="nom" required /></div>
+      <div class="col-md-2"><input class="form-control" placeholder="Prénom" [(ngModel)]="form.prenom" name="prenom" required /></div>
+      <div class="col-md-2"><input class="form-control" placeholder="Téléphone" [(ngModel)]="form.telephone" name="telephone" required /></div>
+      <div class="col-md-2"><input class="form-control" placeholder="N° permis" [(ngModel)]="form.numeroPermis" name="numeroPermis" /></div>
+      <div class="col-md-2"><input type="date" class="form-control" [(ngModel)]="form.dateExpirationPermis" name="dateExpirationPermis" /></div>
+      <div class="col-md-2">
+        <select class="form-select" [(ngModel)]="form.statut" name="statut">
+          <option value="DISPONIBLE">DISPONIBLE</option>
+          <option value="EN_PAUSE">EN_PAUSE</option>
+          <option value="EN_COURSE">EN_COURSE</option>
+          <option value="HORS_SERVICE">HORS_SERVICE</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <button class="btn btn-primary me-2" type="submit">{{ editingId ? 'Modifier' : 'Créer' }}</button>
+        <button class="btn btn-secondary" type="button" *ngIf="editingId" (click)="resetForm()">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">Affecter un véhicule</div>
+  <div class="card-body row g-2">
+    <div class="col-md-4">
+      <select class="form-select" [(ngModel)]="assign.chauffeurId" name="ach">
+        <option [ngValue]="null">-- Chauffeur --</option>
+        <option *ngFor="let c of chauffeurs" [ngValue]="c.id">{{ c.prenom }} {{ c.nom }} (#{{ c.id }})</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select class="form-select" [(ngModel)]="assign.vehiculeId" name="av">
+        <option [ngValue]="null">-- Véhicule --</option>
+        <option *ngFor="let v of vehicules" [ngValue]="v.id">{{ v.immatriculation }} - {{ v.marque }} {{ v.modele }} (#{{ v.id }})</option>
+      </select>
+    </div>
+    <div class="col-md-2"><button class="btn btn-outline-primary" type="button" (click)="affecter()">Affecter</button></div>
+  </div>
+</div>
+
+<div *ngIf="loading" class="text-muted">Chargement...</div>
+<div class="table-responsive" *ngIf="!loading">
+  <table class="table table-striped table-sm align-middle">
+    <thead>
+      <tr><th>ID</th><th>Nom</th><th>Téléphone</th><th>Permis</th><th>Statut</th><th>Véhicule</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of chauffeurs">
+        <td>{{ c.id }}</td>
+        <td>{{ c.prenom }} {{ c.nom }}</td>
+        <td>{{ c.telephone }}</td>
+        <td>{{ c.numeroPermis || '-' }}</td>
+        <td>{{ c.statut }}</td>
+        <td>{{ c.vehicule?.immatriculation || c.vehiculeId || '-' }}</td>
+        <td class="d-flex gap-1 flex-wrap">
+          <button class="btn btn-sm btn-outline-secondary" (click)="edit(c)">Modifier</button>
+          <button class="btn btn-sm btn-outline-success" (click)="setStatut(c.id, 'DISPONIBLE')">Dispo</button>
+          <button class="btn btn-sm btn-outline-warning" (click)="setStatut(c.id, 'EN_PAUSE')">Pause</button>
+          <button class="btn btn-sm btn-outline-dark" (click)="retirer(c.id)">Retirer véhicule</button>
+          <button class="btn btn-sm btn-outline-danger" (click)="remove(c.id)">Supprimer</button>
+        </td>
+      </tr>
+      <tr *ngIf="chauffeurs.length === 0"><td colspan="7" class="text-muted">Aucun chauffeur.</td></tr>
+    </tbody>
+  </table>
+</div>

@@ -1,2 +1,39 @@
 <h2>Gestion des clients</h2>
-<p>Module clients - Projet Taxis</p>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+<div class="card mb-3">
+  <div class="card-header">{{ editingId ? 'Modifier le client' : 'Nouveau client' }}</div>
+  <div class="card-body">
+    <form (ngSubmit)="save()" class="row g-2">
+      <div class="col-md-3"><input class="form-control" placeholder="Nom" [(ngModel)]="form.nom" name="nom" required /></div>
+      <div class="col-md-3"><input class="form-control" placeholder="Prénom" [(ngModel)]="form.prenom" name="prenom" required /></div>
+      <div class="col-md-3"><input class="form-control" placeholder="Téléphone" [(ngModel)]="form.telephone" name="telephone" required /></div>
+      <div class="col-md-3"><input class="form-control" type="email" placeholder="Email" [(ngModel)]="form.email" name="email" /></div>
+      <div class="col-12">
+        <button class="btn btn-primary me-2" type="submit">{{ editingId ? 'Modifier' : 'Créer' }}</button>
+        <button class="btn btn-secondary" type="button" *ngIf="editingId" (click)="resetForm()">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div *ngIf="loading" class="text-muted">Chargement...</div>
+<div class="table-responsive" *ngIf="!loading">
+  <table class="table table-striped table-sm align-middle">
+    <thead>
+      <tr><th>ID</th><th>Nom</th><th>Téléphone</th><th>Email</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of clients">
+        <td>{{ c.id }}</td>
+        <td>{{ c.prenom }} {{ c.nom }}</td>
+        <td>{{ c.telephone }}</td>
+        <td>{{ c.email || '-' }}</td>
+        <td><button class="btn btn-sm btn-outline-secondary" (click)="edit(c)">Modifier</button></td>
+      </tr>
+      <tr *ngIf="clients.length === 0"><td colspan="5" class="text-muted">Aucun client.</td></tr>
+    </tbody>
+  </table>
+</div>

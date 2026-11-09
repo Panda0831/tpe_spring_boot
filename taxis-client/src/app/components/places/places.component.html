@@ -6,13 +6,16 @@
         <div class="col-md-3">
           <select class="form-control" [(ngModel)]="filtrage.zone">
             <option value="">Toutes zones</option>
-            @for (zone of zones; track zone) { <option [value]="zone">{{ zone }}</option }</select>
+            @for (zone of zones; track zone) {
+              <option [value]="zone">{{ zone }}</option>
+            }
+          </select>
         </div>
         <div class="col-md-3">
           <select class="form-control" [(ngModel)]="filtrage.type">
             <option value="">Tous types</option>
             @for (type of ['LIBRE', 'OCCUPÉE', 'RÉSERVÉE', 'VIP', 'PMR']; track type) { 
-              <option [value]="type">{{ type }}</option }
+              <option [value]="type">{{ type }}</option>
             }
           </select>
         </div>
@@ -20,7 +23,7 @@
           <select class="form-control" [(ngModel)]="filtrage.statut">
             <option value="">Tous statuts</option>
             @for (statut of ['LIBRE', 'OCCUPÉE', 'RÉSERVÉE', 'VIP', 'PMR']; track statut) { 
-              <option [value]="statut">{{ statut }}</option }
+              <option [value]="statut">{{ statut }}</option>
             }
           </select>
         </div>

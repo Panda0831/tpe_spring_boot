@@ -1,63 +1,91 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { TaxisService } from '../../services/taxis.service';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'tpe-dashboard',
   templateUrl: './dashboard.component.html',
   standalone: true,
-  imports: []
+  imports: [CommonModule, RouterLink],
 })
 export class DashboardComponent implements OnInit {
   chauffeurs: any[] = [];
   vehicules: any[] = [];
   courses: any[] = [];
   clients: any[] = [];
-  statsRevenue: any = {};
-  statsActivity: any = {};
-  isLoggedIn = false;
+  revenue: any = null;
+  activity: any = null;
+  loading = true;
+  error = '';
 
-  constructor(
-    private taxisService: TaxisService,
-    private authService: AuthService
-  ) {}
+  constructor(private taxis: TaxisService) {}
 
   ngOnInit(): void {
-    this.loadData();
-    this.authService.currentUser.subscribe(user => {
-      this.isLoggedIn = user.authenticated === true;
+    this.load();
+  }
+
+  private contentOf(page: any): any[] {
+    if (Array.isArray(page)) return page;
+    if (page && Array.isArray(page.content)) return page.content;
+    return [];
+  }
+
+  load(): void {
+    this.loading = true;
+    this.error = '';
+    this.taxis.getChauffeurs(0, 10).subscribe({
+      next: (d) => (this.chauffeurs = this.contentOf(d)),
+      error: (e) => (this.error = this.msg(e)),
+    });
+    this.taxis.getVehicules(0, 10).subscribe({
+      next: (d) => (this.vehicules = this.contentOf(d)),
+      error: (e) => (this.error = this.msg(e)),
+    });
+    this.taxis.getCourses(0, 10).subscribe({
+      next: (d) => (this.courses = this.contentOf(d)),
+      error: (e) => (this.error = this.msg(e)),
+    });
+    this.taxis.getClients(0, 10).subscribe({
+      next: (d) => (this.clients = this.contentOf(d)),
+      error: (e) => (this.error = this.msg(e)),
+    });
+    this.taxis.getRevenueStats().subscribe({
+      next: (d) => (this.revenue = d),
+      error: (e) => (this.error = this.msg(e)),
+    });
+    this.taxis.getActivityStats().subscribe({
+      next: (d) => {
+        this.activity = d;
+        this.loading = false;
+      },
+      error: (e) => {
+        this.error = this.msg(e);
+        this.loading = false;
+      },
     });
   }
 
-  loadData(): void {
-    this.taxisService.getChauffeurs().subscribe({
-      next: (data) => this.chauffeurs = data,
-      error: (err) => console.error('Erreur chauffeurs', err)
-    });
+  count(page: any): number {
+    if (!page) return 0;
+    if (Array.isArray(page)) return page.length;
+    if (typeof page.totalElements === 'number') return page.totalElements;
+    if (Array.isArray(page.content)) return page.content.length;
+    return 0;
+  }
 
-    this.taxisService.getVehicules().subscribe({
-      next: (data) => this.vehicules = data,
-      error: (err) => console.error('Erreur vehicules', err)
-    });
+  keys(obj: any): string[] {
+    return obj ? Object.keys(obj) : [];
+  }
 
-    this.taxisService.getCourses().subscribe({
-      next: (data) => this.courses = data,
-      error: (err) => console.error('Erreur courses', err)
-    });
+  format(val: any): string {
+    if (val === null || val === undefined) return '-';
+    if (typeof val === 'object') return JSON.stringify(val);
+    return String(val);
+  }
 
-    this.taxisService.getClients().subscribe({
-      next: (data) => this.clients = data,
-      error: (err) => console.error('Erreur clients', err)
-    });
-
-    this.taxisService.getRevenueStats().subscribe({
-      next: (data) => this.statsRevenue = data,
-      error: (err) => console.error('Erreur stats revenue', err)
-    });
-
-    this.taxisService.getActivityStats().subscribe({
-      next: (data) => this.statsActivity = data,
-      error: (err) => console.error('Erreur stats activity', err)
-    });
+  private msg(e: any): string {
+    if (e?.status === 401) return 'Non authentifié. Veuillez vous reconnecter.';
+    return e?.error?.message || e?.message || 'Erreur lors du chargement des données.';
   }
 }

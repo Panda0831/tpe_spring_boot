@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ParkingService } from '../../services/parking.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -6,7 +8,7 @@ import { AuthService } from '../../services/auth.service';
   selector: 'tpe-abonnements',
   templateUrl: './abonnements.component.html',
   standalone: true,
-  imports: []
+  imports: [CommonModule, FormsModule]
 })
 export class AbonnementsComponent implements OnInit {
   abonnements: any[] = [];

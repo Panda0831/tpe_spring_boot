@@ -1,20 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+import { map, catchError } from 'rxjs/operators';
 
 export interface User {
-  id: number;
   username: string;
-  email: string;
-  role: string;
   authenticated: boolean;
-}
-
-export interface Credentials {
-  username: string;
-  password: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -22,13 +13,11 @@ export class AuthService {
   private currentUserSubject: BehaviorSubject<User>;
   public currentUser: Observable<User>;
 
-  private loginSource = new BehaviorSubject<boolean>(false);
-  public loginFailed = this.loginSource.asObservable();
-
-  private apiUrl = 'api';
-
   constructor(private http: HttpClient) {
-    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('currentUser') || '{}'));
+    const stored = localStorage.getItem('currentUser');
+    this.currentUserSubject = new BehaviorSubject<User>(
+      stored ? JSON.parse(stored) : { username: '', authenticated: false }
+    );
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
@@ -36,36 +25,37 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
-  login(credentials: Credentials): Observable<boolean> {
-    return this.http.post<User>(`/${this.apiUrl}/login`, credentials)
-      .pipe(
-        map(user => {
-          if (user && user.authenticated) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            this.currentUserSubject.next(user);
-            return true;
-          } else {
-            return false;
-          }
-        })
-      );
+  login(username: string, password: string): Observable<boolean> {
+    const basic = btoa(`${username}:${password}`);
+    localStorage.setItem('basicAuth', basic);
+    // Verify credentials against a protected endpoint
+    return this.http.get('/api/chauffeurs', { params: { page: '0', size: '1' } }).pipe(
+      map(() => {
+        const user: User = { username, authenticated: true };
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+        return true;
+      }),
+      catchError(() => {
+        localStorage.removeItem('basicAuth');
+        localStorage.removeItem('currentUser');
+        this.currentUserSubject.next({ username: '', authenticated: false });
+        return of(false);
+      })
+    );
   }
 
   logout(): void {
+    localStorage.removeItem('basicAuth');
     localStorage.removeItem('currentUser');
-    this.currentUserSubject.next({} as User);
+    this.currentUserSubject.next({ username: '', authenticated: false });
   }
 
   isAuthenticated(): boolean {
-    return this.currentUserValue.authenticated === true;
-  }
-
-  getToken(): string | null {
-    const user = this.currentUserValue;
-    return user.token || null;
+    return !!localStorage.getItem('basicAuth') && this.currentUserValue.authenticated === true;
   }
 
   getRole(): string {
-    return this.currentUserValue.role || 'USER';
+    return (this.currentUserValue as any)?.role || 'USER';
   }
 }

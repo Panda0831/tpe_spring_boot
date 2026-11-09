@@ -1,2 +1,55 @@
 <h2>Gestion des véhicules</h2>
-<p>Module véhicules - Projet Taxis</p>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+<div class="card mb-3">
+  <div class="card-header">{{ editingId ? 'Modifier le véhicule' : 'Nouveau véhicule' }}</div>
+  <div class="card-body">
+    <form (ngSubmit)="save()" class="row g-2">
+      <div class="col-md-2"><input class="form-control" placeholder="Immatriculation" [(ngModel)]="form.immatriculation" name="immatriculation" required /></div>
+      <div class="col-md-2"><input class="form-control" placeholder="Marque" [(ngModel)]="form.marque" name="marque" required /></div>
+      <div class="col-md-2"><input class="form-control" placeholder="Modèle" [(ngModel)]="form.modele" name="modele" required /></div>
+      <div class="col-md-1"><input type="number" class="form-control" placeholder="Année" [(ngModel)]="form.annee" name="annee" /></div>
+      <div class="col-md-1"><input type="number" class="form-control" placeholder="Cap." [(ngModel)]="form.capacite" name="capacite" /></div>
+      <div class="col-md-2"><input type="number" class="form-control" placeholder="Kilométrage" [(ngModel)]="form.kilometrage" name="kilometrage" /></div>
+      <div class="col-md-2">
+        <select class="form-select" [(ngModel)]="form.statut" name="statut">
+          <option value="DISPONIBLE">DISPONIBLE</option>
+          <option value="EN_COURSE">EN_COURSE</option>
+          <option value="MAINTENANCE">MAINTENANCE</option>
+          <option value="HORS_SERVICE">HORS_SERVICE</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <button class="btn btn-primary me-2" type="submit">{{ editingId ? 'Modifier' : 'Créer' }}</button>
+        <button class="btn btn-secondary" type="button" *ngIf="editingId" (click)="resetForm()">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div *ngIf="loading" class="text-muted">Chargement...</div>
+<div class="table-responsive" *ngIf="!loading">
+  <table class="table table-striped table-sm align-middle">
+    <thead>
+      <tr><th>ID</th><th>Immatriculation</th><th>Marque / Modèle</th><th>Année</th><th>Capacité</th><th>Kilométrage</th><th>Statut</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let v of vehicules">
+        <td>{{ v.id }}</td>
+        <td>{{ v.immatriculation }}</td>
+        <td>{{ v.marque }} {{ v.modele }}</td>
+        <td>{{ v.annee ?? '-' }}</td>
+        <td>{{ v.capacite ?? '-' }}</td>
+        <td>{{ v.kilometrage ?? '-' }}</td>
+        <td>{{ v.statut }}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-secondary me-1" (click)="edit(v)">Modifier</button>
+          <button class="btn btn-sm btn-outline-danger" (click)="remove(v.id)">Supprimer</button>
+        </td>
+      </tr>
+      <tr *ngIf="vehicules.length === 0"><td colspan="8" class="text-muted">Aucun véhicule.</td></tr>
+    </tbody>
+  </table>
+</div>

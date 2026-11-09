@@ -1,2 +1,67 @@
 <h2>Gestion de la flotte</h2>
-<p>Module flotte - Projet Taxis</p>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<button class="btn btn-outline-primary mb-3" (click)="load()" [disabled]="loading">
+  {{ loading ? 'Chargement...' : 'Actualiser' }}
+</button>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">Véhicules disponibles ({{ vehiculesDisponibles.length }})</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>ID</th><th>Immatriculation</th><th>Marque / Modèle</th><th>Statut</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let v of vehiculesDisponibles">
+              <td>{{ v.id }}</td>
+              <td>{{ v.immatriculation }}</td>
+              <td>{{ v.marque }} {{ v.modele }}</td>
+              <td>{{ v.statut }}</td>
+            </tr>
+            <tr *ngIf="vehiculesDisponibles.length === 0"><td colspan="4" class="text-muted">Aucun véhicule disponible.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">Chauffeurs éligibles ({{ chauffeursEligibles.length }})</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead><tr><th>ID</th><th>Nom</th><th>Téléphone</th><th>Statut</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of chauffeursEligibles">
+              <td>{{ c.id }}</td>
+              <td>{{ c.prenom }} {{ c.nom }}</td>
+              <td>{{ c.telephone }}</td>
+              <td>{{ c.statut }}</td>
+            </tr>
+            <tr *ngIf="chauffeursEligibles.length === 0"><td colspan="4" class="text-muted">Aucun chauffeur éligible.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-header">Tous les véhicules ({{ vehicules.length }})</div>
+  <div class="table-responsive">
+    <table class="table table-sm mb-0">
+      <thead><tr><th>ID</th><th>Immatriculation</th><th>Marque / Modèle</th><th>Année</th><th>Kilométrage</th><th>Statut</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let v of vehicules">
+          <td>{{ v.id }}</td>
+          <td>{{ v.immatriculation }}</td>
+          <td>{{ v.marque }} {{ v.modele }}</td>
+          <td>{{ v.annee ?? '-' }}</td>
+          <td>{{ v.kilometrage ?? '-' }}</td>
+          <td>{{ v.statut }}</td>
+        </tr>
+        <tr *ngIf="vehicules.length === 0"><td colspan="6" class="text-muted">Aucun véhicule.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

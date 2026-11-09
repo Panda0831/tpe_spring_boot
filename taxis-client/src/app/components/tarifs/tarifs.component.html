@@ -1,2 +1,48 @@
 <h2>Configuration des tarifs</h2>
-<p>Module tarifs - Projet Taxis</p>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+<div class="card mb-3" *ngIf="editing">
+  <div class="card-header">Modifier le tarif #{{ editing.id }}</div>
+  <div class="card-body">
+    <form (ngSubmit)="save()" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Tarif de base</label>
+        <input type="number" step="0.01" class="form-control" [(ngModel)]="editing.tarifBase" name="tarifBase" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Prix / km</label>
+        <input type="number" step="0.01" class="form-control" [(ngModel)]="editing.prixKm" name="prixKm" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Commission (%)</label>
+        <input type="number" step="0.01" class="form-control" [(ngModel)]="editing.commissionPourcentage" name="commissionPourcentage" required />
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-primary me-2" type="submit">Enregistrer</button>
+        <button class="btn btn-secondary" type="button" (click)="cancel()">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div *ngIf="loading" class="text-muted">Chargement...</div>
+<div class="table-responsive" *ngIf="!loading">
+  <table class="table table-striped table-sm align-middle">
+    <thead>
+      <tr><th>ID</th><th>Tarif de base</th><th>Prix / km</th><th>Commission (%)</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let t of tarifs">
+        <td>{{ t.id }}</td>
+        <td>{{ t.tarifBase ?? '-' }}</td>
+        <td>{{ t.prixKm ?? '-' }}</td>
+        <td>{{ t.commissionPourcentage ?? '-' }}</td>
+        <td><button class="btn btn-sm btn-outline-secondary" (click)="edit(t)">Modifier</button></td>
+      </tr>
+      <tr *ngIf="tarifs.length === 0"><td colspan="5" class="text-muted">Aucun paramètre tarifaire.</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="text-muted small">La modification des tarifs peut nécessiter des droits administrateur.</p>

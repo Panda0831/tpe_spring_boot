@@ -1,2 +1,74 @@
 <h2>Gestion des courses</h2>
-<p>Module courses - Projet Taxis</p>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">Commander une course</div>
+      <div class="card-body">
+        <form (ngSubmit)="commander()" class="row g-2">
+          <div class="col-12">
+            <select class="form-select" [(ngModel)]="form.clientId" name="cClient" required>
+              <option [ngValue]="null">-- Client --</option>
+              <option *ngFor="let cl of clients" [ngValue]="cl.id">{{ cl.prenom }} {{ cl.nom }} (#{{ cl.id }})</option>
+            </select>
+          </div>
+          <div class="col-md-6"><input class="form-control" placeholder="Point de départ" [(ngModel)]="form.pointDepart" name="cDepart" required /></div>
+          <div class="col-md-6"><input class="form-control" placeholder="Destination" [(ngModel)]="form.destination" name="cDest" required /></div>
+          <div class="col-md-6"><input type="number" step="0.1" class="form-control" placeholder="Distance (km)" [(ngModel)]="form.distanceKm" name="cDist" required /></div>
+          <div class="col-12"><button class="btn btn-primary" type="submit">Commander</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">Créer et assigner (dispatch)</div>
+      <div class="card-body">
+        <form (ngSubmit)="creerEtAssigner()" class="row g-2">
+          <div class="col-12">
+            <select class="form-select" [(ngModel)]="assignForm.clientId" name="aClient" required>
+              <option [ngValue]="null">-- Client --</option>
+              <option *ngFor="let cl of clients" [ngValue]="cl.id">{{ cl.prenom }} {{ cl.nom }} (#{{ cl.id }})</option>
+            </select>
+          </div>
+          <div class="col-md-6"><input class="form-control" placeholder="Point de départ" [(ngModel)]="assignForm.pointDepart" name="aDepart" required /></div>
+          <div class="col-md-6"><input class="form-control" placeholder="Destination" [(ngModel)]="assignForm.destination" name="aDest" required /></div>
+          <div class="col-md-6"><input type="number" step="0.1" class="form-control" placeholder="Distance (km)" [(ngModel)]="assignForm.distanceKm" name="aDist" required /></div>
+          <div class="col-12"><button class="btn btn-success" type="submit">Créer et assigner</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="loading" class="text-muted">Chargement...</div>
+<div class="table-responsive" *ngIf="!loading">
+  <table class="table table-striped table-sm align-middle">
+    <thead>
+      <tr><th>ID</th><th>Client</th><th>Départ</th><th>Destination</th><th>Distance</th><th>Statut</th><th>Chauffeur</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of courses">
+        <td>{{ c.id }}</td>
+        <td>{{ c.client?.prenom || '' }} {{ c.client?.nom || c.clientId || '-' }}</td>
+        <td>{{ c.pointDepart || c.depart || '-' }}</td>
+        <td>{{ c.destination || '-' }}</td>
+        <td>{{ c.distanceKm ?? '-' }}</td>
+        <td><span class="badge bg-secondary">{{ c.statut }}</span></td>
+        <td>{{ c.chauffeur?.prenom || '' }} {{ c.chauffeur?.nom || c.chauffeurId || '-' }}</td>
+        <td class="d-flex gap-1 flex-wrap">
+          <button class="btn btn-sm btn-outline-primary" (click)="dispatch(c.id)">Dispatcher</button>
+          <button class="btn btn-sm btn-outline-success" (click)="demarrer(c.id)">Démarrer</button>
+          <button class="btn btn-sm btn-outline-info" (click)="terminer(c.id)">Terminer</button>
+          <button class="btn btn-sm btn-outline-warning" (click)="annuler(c.id)">Annuler</button>
+          <button class="btn btn-sm btn-outline-danger" (click)="supprimer(c.id)">Supprimer</button>
+        </td>
+      </tr>
+      <tr *ngIf="courses.length === 0"><td colspan="8" class="text-muted">Aucune course.</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="text-muted small">Les actions de cycle de vie dépendent du statut actuel de la course et des permissions (operator/manager/admin).</p>

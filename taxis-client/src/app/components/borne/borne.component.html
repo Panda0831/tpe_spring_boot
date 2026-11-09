@@ -1,0 +1,16 @@
+<div class="container">
+  <h2>Borne d'entrée/sortie</h2>
+  <div class="card mb-3">
+    <div class="card-body">
+      <label class="form-label">Immatriculation</label>
+      <div class="input-group">
+        <input class="form-control" [(ngModel)]="vehiculeImmatriculation" placeholder="Ex: AB-123-CD" />
+        <button class="btn btn-primary" (click)="enregistrerEntree()">Enregistrer entrée</button>
+      </div>
+    </div>
+  </div>
+  <h5>Entrées en cours ({{ entreesEnCours.length }})</h5>
+  <ul>
+    <li *ngFor="let e of entreesEnCours">{{ e.immatriculation || e.vehicule?.immatriculation || e.id }}</li>
+  </ul>
+</div>

@@ -1,18 +1,26 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="app-navbar" *ngIf="auth.isAuthenticated()">
   <div class="container-fluid">
-    <a class="navbar-brand" routerLink="/dashboard">Taxis</a>
-    <div class="navbar-nav">
-      <a class="nav-link" routerLink="/dashboard">Dashboard</a>
-      <a class="nav-link" routerLink="/courses">Courses</a>
-      <a class="nav-link" routerLink="/chauffeurs">Chauffeurs</a>
-      <a class="nav-link" routerLink="/vehicules">Véhicules</a>
-      <a class="nav-link" routerLink="/clients">Clients</a>
-      <a class="nav-link" routerLink="/flotte">Flotte</a>
-      <a class="nav-link" routerLink="/statistiques">Statistiques</a>
-      <a class="nav-link" routerLink="/tarifs">Tarifs</a>
+    <a class="app-brand" routerLink="/dashboard" aria-label="TaxiPilot, accueil">
+      <span class="brand-mark" aria-hidden="true">T</span>
+      <span>Taxi<span class="brand-light">Pilot</span><small>Gestion de flotte</small></span>
+    </a>
+    <div class="app-nav-links" aria-label="Navigation principale">
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a>
+      <a routerLink="/courses" routerLinkActive="active">Courses</a>
+      <a routerLink="/chauffeurs" routerLinkActive="active">Chauffeurs</a>
+      <a routerLink="/vehicules" routerLinkActive="active">Véhicules</a>
+      <a routerLink="/clients" routerLinkActive="active">Clients</a>
+      <a routerLink="/flotte" routerLinkActive="active">Flotte</a>
+      <a routerLink="/statistiques" routerLinkActive="active">Statistiques</a>
+      <a routerLink="/tarifs" routerLinkActive="active">Tarifs</a>
+    </div>
+    <div class="app-user" *ngIf="auth.currentUserValue as u">
+      <span class="user-avatar" aria-hidden="true">{{ u.username.charAt(0).toUpperCase() }}</span>
+      <span class="user-name">{{ u.username }}</span>
+      <button class="btn-logout" (click)="logout()">Quitter</button>
     </div>
   </div>
 </nav>
-<div class="container mt-3">
+<main class="container app-content">
   <router-outlet></router-outlet>
-</div>
+</main>

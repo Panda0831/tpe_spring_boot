@@ -1,0 +1,165 @@
+.app-navbar {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 9%);
+  background: #14251f;
+  box-shadow: 0 8px 26px rgb(16 36 29 / 12%);
+}
+
+.app-navbar .container-fluid {
+  display: flex;
+  min-height: 78px;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.app-brand {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.7rem;
+  color: #fff;
+  font-family: 'Aptos Display', 'Segoe UI', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-decoration: none;
+}
+
+.app-brand:hover {
+  color: #fff;
+}
+
+.brand-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--taxi-accent);
+  color: #19332a;
+  font-size: 1.25rem;
+}
+
+.brand-light {
+  color: var(--taxi-accent);
+}
+
+.app-brand small {
+  display: block;
+  margin-top: 0.25rem;
+  color: #a8b8b0;
+  font-family: 'Aptos', 'Segoe UI', sans-serif;
+  font-size: 0.67rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.app-nav-links {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.app-nav-links a {
+  padding: 0.6rem 0.75rem;
+  border-radius: 9px;
+  color: #c3cec9;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.app-nav-links a:hover,
+.app-nav-links a.active {
+  background: rgb(255 255 255 / 9%);
+  color: #fff;
+}
+
+.app-nav-links a.active {
+  box-shadow: inset 0 -2px 0 var(--taxi-accent);
+}
+
+.app-user {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.user-avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgb(215 243 106 / 30%);
+  border-radius: 50%;
+  background: rgb(215 243 106 / 12%);
+  color: var(--taxi-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.user-name {
+  max-width: 110px;
+  overflow: hidden;
+  color: #e4ebe7;
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+}
+
+.btn-logout {
+  min-height: 36px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgb(255 255 255 / 23%);
+  border-radius: 9px;
+  background: transparent;
+  color: #e4ebe7;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.btn-logout:hover {
+  border-color: var(--taxi-accent);
+  color: var(--taxi-accent);
+}
+
+.app-content {
+  min-height: calc(100vh - 78px);
+}
+
+@media (max-width: 1100px) {
+  .app-navbar .container-fluid {
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+  }
+
+  .app-nav-links {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
+  }
+
+  .app-user {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-name {
+    display: none;
+  }
+
+  .app-nav-links a {
+    padding: 0.55rem 0.65rem;
+  }
+}
